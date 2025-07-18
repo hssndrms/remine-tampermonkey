@@ -14,7 +14,6 @@
 (function() {
     'use strict';
 
-    // Tema class'larını temizleyen fonksiyon
     function removeAllThemeClasses() {
         document.body.classList.forEach(cls => {
             if (cls.startsWith('theme-')) {
