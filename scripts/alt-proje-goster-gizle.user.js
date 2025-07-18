@@ -8,7 +8,6 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/alt-proje-goster-gizle.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/alt-proje-goster-gizle.user.js
-
 // @grant        none
 // ==/UserScript==
 
@@ -17,7 +16,6 @@
 
     const STORAGE_KEY = 'altProjeleriGizle';
 
-    // Font Awesome CDN yükle
     if (!document.querySelector('link[href*="cdnjs.cloudflare.com/ajax/libs/font-awesome"]')) {
         const link = document.createElement('link');
         link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
@@ -25,7 +23,7 @@
         document.head.appendChild(link);
     }
 
-    // Checkbox ekle
+    
     const buttonsContainer = document.querySelector('p.buttons');
     if (buttonsContainer) {
         const checkboxLabel = document.createElement('label');
