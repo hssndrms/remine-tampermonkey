@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Alt Projeleri Göster/Gizle
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-14
+// @version      2025-07-18
 // @description  PYS projeler sayfasındaki alt projeleri gösterip gizlemek için togglebutton ve checkbox ekler (Font Awesome ile)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/projects*
