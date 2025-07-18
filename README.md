@@ -1,5 +1,8 @@
 # remine-tampermonkey
 
+Dasboard, icon değişikliği gibi scriptlerin doğru şekilde çalışabilmesi için Stylus benzeri bir eklenti ile CSS injection yapılmalı. PYS_public_koton.css dosyası kullanılmalı 
+
+
 | Dosya Adı                              | Script Adı                                      | Açıklama                                                                 | Yükle |
 |----------------------------------------|-------------------------------------------------|-------------------------------------------------------------------------|-------|
 | alt-is-duedate-kontrolu.user.js        | PYS Parent task Duedate kontrolü                | Subtask tarihlerine göre parent duedate geri tarihli ise arka planın rengi uygular | [![Yükle](https://www.google.com/s2/favicons?sz=64&domain=https://tampermonkey.net)](https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/alt-is-duedate-kontrolu.user.js) |
