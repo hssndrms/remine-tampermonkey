@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-15
+// @version      2025-07-19
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -163,7 +163,7 @@
                         </div>
                     </div>
                 </div>
-
+            <div class="pys-stat-row">
                 <div class="pys-stat-item">
                     <div class="pys-stat-icon pys-stat-completed">
                         <i class="fas fa-check-circle"></i>
@@ -178,6 +178,21 @@
                     </div>
                 </div>
 
+                <div class="pys-stat-item">
+                    <div class="pys-stat-icon pys-stat-completed">
+                        <i class="far fa-star"></i>
+                    </div>
+                    <div class="pys-stat-content">
+                        <div class="pys-stat-label">
+                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=subject&f[]=status_id&op[status_id]=o&f[]=cf_20&op[cf_20]==&v[cf_20][]=me&f[]=start_date&op[start_date]=w" target="_blank">Bu hafta Başlanacak</a>
+                        </div>
+                        <div class="pys-stat-value" id="start-this-week">
+                            <div class="pys-loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
                 <!-- İzlediğim İşler -->
                 <div class="pys-stat-item">
                     <div class="pys-stat-icon pys-stat-watched">
@@ -445,6 +460,17 @@
                 "op[closed_on]": "m",
             },
             "#completed-this-month"
+        );
+
+        fetchCount(
+            {
+                "f[]": ["cf_20", "status_id", "start_date"],
+                "op[cf_20]": "=",
+                "v[cf_20][]": ["me"],
+                "op[status_id]": "o",
+                "op[start_date]": "w",
+            },
+            "#start-this-week"
         );
 
         fetchCount(
