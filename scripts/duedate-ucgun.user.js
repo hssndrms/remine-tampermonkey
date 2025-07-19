@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         PYS Due Date veya startdate 3 gün içindeyse Renklendir
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-01
+// @version      2025-07-19
 // @description  Duedati bugün olan kayıtlara ait tablodaki satıra dueToday ekler.
 // @author       hssndrms
-// @match        https://pys.koton.com.tr/*
-// @match        https://pys.koton.com.tr/projects*
+// @match        https://pys.koton.com.tr/*issues*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/duedate-ucgun.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/duedate-ucgun.user.js

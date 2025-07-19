@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS İş Analisti otomatik seçilsin
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-02
+// @version      2025-07-19
 // @description  iş analisti özel alanında kendimin otomatik seçilmesi
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/projects/*/issues/new
