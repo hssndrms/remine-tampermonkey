@@ -104,7 +104,7 @@
                     </div>
                     <div class="pys-stat-content">
                         <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=17" target="_blank">Yeni İşler</a>
+                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]==&v[status_id][]=17" target="_blank">Yeni İşler</a>
                         </div>
                         <div class="pys-stat-value" id="new-issues">
                             <div class="pys-loading-spinner"></div>
@@ -497,7 +497,9 @@
             {
                 "f[]": ["assigned_to_id", "status_id"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["17"], // This seems to be a fixed value, not 'me' or dynamic
+                "v[assigned_to_id][]": [userId],
+                "op[status_id]": "=",
+                "v[status_id][]": "17",
             },
             "#new-issues",
             userId // Pass userId for link modification
