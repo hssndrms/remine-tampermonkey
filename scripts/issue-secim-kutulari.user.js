@@ -141,8 +141,16 @@
             }
 
             // Toggle "Tümünü Seç" kontrollerinin görünürlüğü
-            document.querySelectorAll('.select-all-wrapper').forEach(div => {
+             document.querySelectorAll('.select-all-wrapper').forEach(div => {
                 div.style.display = checked ? 'block' : 'none';
+
+                // Toggle kapandıysa, sadece "Tümünü Seç" kutusunu pasifleştir
+                if (!checked) {
+                    const selectAllCheckbox = div.querySelector('input[type=checkbox]');
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = false;
+                    }
+                }
             });
         });
 
