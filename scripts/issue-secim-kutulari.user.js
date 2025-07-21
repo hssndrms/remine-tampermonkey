@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         PYS Issue Seçim Kutuları
+// @name         PYS Issue subtask ve relation çoklu seçim
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-20
-// @description  Seçim kutularını görünür yapar ve tümünü seç kutuları ekler
+// @version      2025-07-21
+// @description  subtask ve relation kısmında seçim kutularını görünür yapar ve tümünü seç kutuları ekler
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
@@ -108,14 +108,11 @@
     });
 });
 
-
-
         // Başta gizli, toggle ile gösterilecek
         div.style.display = 'none';
         div.dataset.section = sectionId;
         return div;
     }
-
 
     window.addEventListener('load', () => {
         const issueTree = document.getElementById('issue_tree');
@@ -127,7 +124,7 @@
         const issueTable = issueTree?.querySelector(TABLE_SELECTOR);
         const relationsTable = relations?.querySelector(TABLE_SELECTOR);
 
-        const toggleCheckbox = addToggleControl(issueTreeContextual, 'Seçim kutuları aktif', TOGGLE_ID, () => {
+        const toggleCheckbox = addToggleControl(issueTreeContextual, 'Çoklu seçim aktif', TOGGLE_ID, () => {
             const checked = toggleCheckbox.checked;
             if (checked) {
                 injectStyle(STYLE_ID, `
