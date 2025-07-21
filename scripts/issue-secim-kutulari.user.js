@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Issue Seçim Kutuları
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-21
+// @version      2025-07-20
 // @description  Seçim kutularını görünür yapar ve tümünü seç kutuları ekler
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
