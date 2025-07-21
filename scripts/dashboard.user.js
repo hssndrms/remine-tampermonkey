@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-19
+// @version      2025-07-21
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -261,7 +261,7 @@
                 </div>
 
                 <div class="pys-time-link">
-                    <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m" target="_blank" class="pys-btn pys-btn-outline">
+                    <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=spent_on" target="_blank" class="pys-btn pys-btn-outline">
                         <i class="fas fa-external-link-alt"></i> Detayları Görüntüle
                     </a>
                 </div>
