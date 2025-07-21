@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-21
+// @version      2025-07-22
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -56,13 +56,23 @@
 <div class="pys-dashboard-wrapper">
     <div class="pys-dashboard-header">
         <h2><i class="fas fa-tachometer-alt"></i> PYS Dashboard</h2>
-        <div class="pys-refresh-btn" id="pys-refresh" title="Verileri Yenile">
-            <i class="fas fa-sync-alt"></i>
+        <div class="pys-header-controls">
+            <select id="pys-user-select" class="pys-select">
+                <option value="me"><<me>></option>
+            </select>
+            <button id="pys-add-user-option" class="pys-btn pys-btn-sm" title="Yeni Kullanıcı Ekle">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button id="pys-load-user-data" class="pys-btn pys-btn-sm" title="Seçilen Kullanıcıya Göre Verileri Yükle">
+                <i class="fas fa-user-check"></i>
+            </button>
+            <div class="pys-refresh-btn" id="pys-refresh" title="Verileri Yenile">
+                <i class="fas fa-sync-alt"></i>
+            </div>
         </div>
     </div>
 
     <div class="pys-dashboard-grid">
-        <!-- İş Sayıları Kartı -->
         <div class="pys-card pys-card-primary">
             <div class="pys-card-header">
                 <h3><i class="fas fa-tasks"></i> İş Durumu</h3>
@@ -94,7 +104,7 @@
                     </div>
                     <div class="pys-stat-content">
                         <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]==&v[status_id][]=17" target="_blank">Yeni İşler</a>
+                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=17" target="_blank">Yeni İşler</a>
                         </div>
                         <div class="pys-stat-value" id="new-issues">
                             <div class="pys-loading-spinner"></div>
@@ -193,7 +203,6 @@
                 </div>
 
             </div>
-                <!-- İzlediğim İşler -->
                 <div class="pys-stat-item">
                     <div class="pys-stat-icon pys-stat-watched">
                         <i class="fas fa-eye"></i>
@@ -210,7 +219,6 @@
             </div>
         </div>
 
-        <!-- Zaman Özeti Kartı -->
         <div class="pys-card pys-card-secondary">
             <div class="pys-card-header">
                 <h3><i class="fas fa-stopwatch"></i> Zaman Özeti</h3>
@@ -266,7 +274,6 @@
                     </a>
                 </div>
 
-                <!-- Girilen son 10 zaman bilgisi -->
                 <h4 class="pys-time-table-header"><i class="fas fa-list-ol"></i> Son 10 Zaman Kaydı</h4>
                 <div class="pys-time-table-wrapper">
                     <table class="pys-time-table">
@@ -289,7 +296,6 @@
             </div>
         </div>
 
-        <!-- Aktivite Dağılımı -->
         <div class="pys-card pys-card-tertiary">
             <div class="pys-card-header">
                 <h3><i class="fas fa-chart-pie"></i> Aktivite Dağılımı</h3>
@@ -321,7 +327,6 @@
         // API anahtarını sıfırlamak için buton ekle
         const resetBtn = document.createElement("button");
         resetBtn.className = "pys-btn";
-        resetBtn.style.margin = "10px";
         resetBtn.title = "API Anahtarını sıfırla";
         resetBtn.innerHTML = `<i class="fas fa-lock"></i>`;
         resetBtn.onclick = function () {
@@ -335,6 +340,67 @@
             lastUpdatedDiv.appendChild(resetBtn);
         }
 
+        let selectedUserId = localStorage.getItem("pysSelectedUserId") || "me";
+        const userSelect = document.getElementById("pys-user-select");
+        const loadUserBtn = document.getElementById("pys-load-user-data");
+        const addUserOptionBtn = document.getElementById("pys-add-user-option"); // Yeni buton
+
+        // Fetch and populate users, then load all data
+        fetchUsersAndPopulateSelect(function() {
+            // This callback ensures loadAllData runs AFTER select is fully populated and its value is set
+            selectedUserId = userSelect.value; // Get the currently set value from the select
+            loadAllData(selectedUserId);
+        });
+
+        // Event listener for user select change
+        if (userSelect) {
+            userSelect.addEventListener("change", function () {
+                selectedUserId = this.value;
+                localStorage.setItem("pysSelectedUserId", selectedUserId);
+                loadAllData(selectedUserId); // Reload data based on new selection
+            });
+        }
+
+        // Event listener for load user data button
+        if (loadUserBtn) {
+            loadUserBtn.addEventListener("click", function () {
+                loadAllData(selectedUserId);
+            });
+        }
+
+        // NEW: Event listener for add user option button
+        if (addUserOptionBtn) {
+            addUserOptionBtn.addEventListener("click", function () {
+                const userName = prompt("Yeni kullanıcı adını girin (örn: John Doe):");
+                if (!userName) {
+                    alert("Kullanıcı adı boş bırakılamaz.");
+                    return;
+                }
+                const userId = prompt(`"${userName}" için kullanıcı ID'sini girin (Redmine'daki ID):`);
+                if (!userId || isNaN(userId)) {
+                    alert("Geçerli bir kullanıcı ID'si girilmelidir.");
+                    return;
+                }
+
+                let customUsers = JSON.parse(localStorage.getItem("pysCustomUsers") || "[]");
+                // Check if user already exists
+                if (customUsers.some(u => u.id === userId)) {
+                    alert("Bu kullanıcı ID'si zaten mevcut.");
+                    return;
+                }
+
+                customUsers.push({ id: userId, name: userName });
+                localStorage.setItem("pysCustomUsers", JSON.stringify(customUsers));
+
+                // Re-populate the select to include the new user, then select it and load data
+                fetchUsersAndPopulateSelect(function() {
+                    userSelect.value = userId;
+                    selectedUserId = userId; // Update selectedUserId after setting select value
+                    localStorage.setItem("pysSelectedUserId", selectedUserId);
+                    loadAllData(selectedUserId);
+                });
+            });
+        }
 
 
         // Refresh butonu event listener
@@ -346,7 +412,7 @@
                 innerElement.classList.add("pys-loading");
             }
 
-            loadAllData();
+            loadAllData(selectedUserId); // Pass selected user ID
         });
 
         document.querySelectorAll('.pys-stat-item').forEach(function(item) {
@@ -374,14 +440,45 @@
                 }
             });
         });
-
-
-
-        // İlk yükleme
-        loadAllData();
     }
 
-    function loadAllData() {
+    // fetchUsersAndPopulateSelect now accepts a callback
+    function fetchUsersAndPopulateSelect(callback) {
+        ensureApiKey();
+        const userSelect = document.getElementById("pys-user-select");
+        if (!userSelect) {
+            console.error("User select element not found.");
+            if (callback) callback();
+            return;
+        }
+
+        // Clear existing options
+        userSelect.innerHTML = '';
+
+        // Add default 'me' option
+        const meOption = document.createElement("option");
+        meOption.value = "me";
+        meOption.textContent = "<<me>>";
+        userSelect.appendChild(meOption);
+
+        // Add custom users from localStorage
+        const customUsers = JSON.parse(localStorage.getItem("pysCustomUsers") || "[]");
+        customUsers.forEach(user => {
+            const option = document.createElement("option");
+            option.value = user.id;
+            option.textContent = user.name;
+            userSelect.appendChild(option);
+        });
+
+        // No longer fetching users from users.json as per user request.
+
+        // Restore the previously selected value AFTER all options are added
+        userSelect.value = localStorage.getItem("pysSelectedUserId") || "me";
+
+        if (callback) callback(); // Call the callback after all operations are done
+    }
+
+    function loadAllData(userId) {
         updateLastUpdateTime();
         ensureApiKey();
         // İş sayıları
@@ -389,88 +486,94 @@
             {
                 "f[]": ["assigned_to_id", "status_id"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "o",
             },
-            "#open-issues"
+            "#open-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
-                "op[status_id]": "=",
-                "v[status_id][]": "17",
+                "v[assigned_to_id][]": ["17"], // This seems to be a fixed value, not 'me' or dynamic
             },
-            "#new-issues"
+            "#new-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id", "due_date"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "o",
                 "op[due_date]": "<=",
                 "v[due_date][]": [YESTERDAY],
             },
-            "#overdue-issues"
+            "#overdue-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id", "due_date"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "o",
                 "op[due_date]": "w",
             },
-            "#due-this-week-issues"
+            "#due-this-week-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id", "due_date"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "o",
                 "op[due_date]": "t",
             },
-            "#due-today-issues"
+            "#due-today-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id", "due_date"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "o",
                 "op[due_date]": "m",
             },
-            "#due-this-month-issues"
+            "#due-this-month-issues",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["assigned_to_id", "status_id", "closed_on"],
                 "op[assigned_to_id]": "=",
-                "v[assigned_to_id][]": ["me"],
+                "v[assigned_to_id][]": [userId], // Use userId
                 "op[status_id]": "c",
                 "op[closed_on]": "m",
             },
-            "#completed-this-month"
+            "#completed-this-month",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
             {
                 "f[]": ["cf_20", "status_id", "start_date"],
                 "op[cf_20]": "=",
-                "v[cf_20][]": ["me"],
+                "v[cf_20][]": [userId], // Use userId
                 "op[status_id]": "o",
                 "op[start_date]": "w",
             },
-            "#start-this-week"
+            "#start-this-week",
+            userId // Pass userId for link modification
         );
 
         fetchCount(
@@ -478,9 +581,10 @@
                 "f[]": ["watcher_id", "status_id"],
                 "op[status_id]": "o",
                 "op[watcher_id]": "=",
-                "v[watcher_id][]": ["me"],
+                "v[watcher_id][]": [userId], // Use userId
             },
-            "#watched-issues"
+            "#watched-issues",
+            userId // Pass userId for link modification
         );
 
         // Bu ayki harcanan toplam zaman
@@ -488,54 +592,69 @@
             {
                 "f[]": ["user_id", "spent_on"],
                 "op[user_id]": "=",
-                "v[user_id][]": ["me"],
+                "v[user_id][]": [userId], // Use userId
                 "op[spent_on]": "m",
             },
-            "#time-spent-this-month"
+            "#time-spent-this-month",
+            userId // Pass userId for link modification
         );
 
         fetchTimeSpentThisMonth(
             {
                 "f[]": ["user_id", "spent_on"],
                 "op[user_id]": "=",
-                "v[user_id][]": ["me"],
+                "v[user_id][]": [userId], // Use userId
                 "op[spent_on]": "w",
             },
-            "#time-spent-this-week"
+            "#time-spent-this-week",
+            userId // Pass userId for link modification
         );
 
         fetchTimeSpentThisMonth(
             {
                 "f[]": ["user_id", "spent_on"],
                 "op[user_id]": "=",
-                "v[user_id][]": ["me"],
+                "v[user_id][]": [userId], // Use userId
                 "op[spent_on]": "t",
             },
-            "#time-spent-this-day"
+            "#time-spent-this-day",
+            userId // Pass userId for link modification
         );
 
-        fetchRecentTimeEntries();
+        fetchRecentTimeEntries(userId); // Pass userId
         const savedPieSelectValue = localStorage.getItem("pysPieSelectValue") || "m";
         document.getElementById("pys-card-pie-select").value = savedPieSelectValue;
-        fetchTimeSpentForChart(savedPieSelectValue);
+        fetchTimeSpentForChart(savedPieSelectValue, userId); // Pass userId
 
         // Seçim değiştiğinde grafiği güncelle
         const pieSelect = document.getElementById("pys-card-pie-select");
         if (pieSelect) {
             pieSelect.addEventListener("change", function () {
                 const selectedValue = this.value;
-                fetchTimeSpentForChart(selectedValue);
+                fetchTimeSpentForChart(selectedValue, userId); // Pass userId
                 localStorage.setItem("pysPieSelectValue", selectedValue);
 
             });
         }
-
     }
 
-    function fetchCount(params, selector) {
+    function fetchCount(params, selector, userId) {
         const url = new URL(`${BASE_URL}/issues.json`);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("limit", 1);
+
+        // Modify the link within the element to reflect the selected user
+        const labelLink = document.querySelector(selector)?.previousElementSibling?.querySelector('a');
+        if (labelLink) {
+            let originalHref = labelLink.href;
+            // Replace 'me' or any numeric ID with the actual userId or keep 'me' if userId is 'me'
+            const userIdParam = (userId === 'me') ? 'me' : userId;
+            originalHref = originalHref.replace(/v\[assigned_to_id\]\[\]=(me|\d+)/g, `v[assigned_to_id][]=${userIdParam}`);
+            originalHref = originalHref.replace(/v\[cf_20\]\[\]=(me|\d+)/g, `v[cf_20][]=${userIdParam}`);
+            originalHref = originalHref.replace(/v\[watcher_id\]\[\]=(me|\d+)/g, `v[watcher_id][]=${userIdParam}`);
+            originalHref = originalHref.replace(/v\[user_id\]\[\]=(me|\d+)/g, `v[user_id][]=${userIdParam}`); // Add this for consistency, though it's typically for time entries
+            labelLink.href = originalHref;
+        }
 
         for (const key in params) {
             const values = Array.isArray(params[key]) ? params[key] : [params[key]];
@@ -571,10 +690,21 @@
         });
     }
 
-    function fetchTimeSpentThisMonth(params, selector) {
+    function fetchTimeSpentThisMonth(params, selector, userId) {
         const url = new URL(`${BASE_URL}/time_entries.json`);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("limit", 100);
+
+        // Modify the link within the element to reflect the selected user
+        const labelLink = document.querySelector(selector)?.closest('.pys-time-content')?.querySelector('a');
+        if (labelLink) {
+            let originalHref = labelLink.href;
+            // Replace 'me' or any numeric ID with the actual userId or keep 'me' if userId is 'me'
+            const userIdParam = (userId === 'me') ? 'me' : userId;
+            originalHref = originalHref.replace(/v\[user_id\]\[\]=(me|\d+)/g, `v[user_id][]=${userIdParam}`);
+            labelLink.href = originalHref;
+        }
+
 
         for (const key in params) {
             const values = Array.isArray(params[key]) ? params[key] : [params[key]];
@@ -601,8 +731,6 @@
                             1
                         )}</span>`;
 
-                        // if (selector === '#time-spent-this-month') {  drawActivityPieChart(data.time_entries); }
-
 
                         // Animate the number
                         animateNumber(
@@ -614,11 +742,9 @@
                         element.innerHTML = '<span class="pys-time-number">0.0</span>';
                     }
 
-                    // Refresh butonunun loading durumunu kaldır
-                    //document.getElementById('pys-refresh').classList.remove('pys-loading');
                     document
                         .querySelector("#pys-refresh i")
-                        .classList.remove("pys-loading");
+                        ?.classList.remove("pys-loading"); // Use optional chaining
                 } catch (err) {
                     console.error("Zaman verisi çekme hatası:", err);
                     document.querySelector(selector).innerHTML =
@@ -628,19 +754,19 @@
             onerror: function () {
                 document.querySelector(selector).innerHTML =
                     '<span class="pys-error">API Hatası</span>';
-                document.getElementById("pys-refresh").classList.remove("pys-loading");
+                document.getElementById("pys-refresh")?.classList.remove("pys-loading"); // Use optional chaining
             },
         });
     }
 
-    function fetchTimeSpentForChart(spent_on_op) {
+    function fetchTimeSpentForChart(spent_on_op, userId) {
         const url = new URL(`${BASE_URL}/time_entries.json`);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("limit", 100);
 
         url.searchParams.append("f[]", "user_id");
         url.searchParams.set("op[user_id]", "=");
-        url.searchParams.append("v[user_id][]", "me");
+        url.searchParams.append("v[user_id][]", userId); // Use userId
 
         url.searchParams.append("f[]", "spent_on");
         url.searchParams.set("op[spent_on]", spent_on_op);
@@ -664,7 +790,7 @@
     }
 
 
-    function fetchRecentTimeEntries() {
+    function fetchRecentTimeEntries(userId) {
         const url = new URL(`${BASE_URL}/time_entries.json`);
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("limit", 10);
@@ -674,7 +800,7 @@
         // Sadece bana ait olanları getir
         url.searchParams.set("f[]", "user_id");
         url.searchParams.set("op[user_id]", "=");
-        url.searchParams.set("v[user_id][]", "me");
+        url.searchParams.set("v[user_id][]", userId); // Use userId
         url.searchParams.set("include", "custom_fields");
 
         GM_xmlhttpRequest({
@@ -688,7 +814,7 @@
                     tbody.innerHTML = "";
 
                     if (!data.time_entries || data.time_entries.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3">Kayıt bulunamadı</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="5">Kayıt bulunamadı</td></tr>`;
                         return;
                     }
 
@@ -731,6 +857,7 @@
             },
         });
     }
+    // --- NEW CODE END ---
 
     let pieChartInstance = null;
     function drawActivityPieChart(timeEntries) {
