@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-22
+// @version      2025-07-23
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -180,7 +180,7 @@
                     </div>
                     <div class="pys-stat-content">
                         <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=subject&f[]=status_id&op[status_id]=c&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=closed_on&op[closed_on]=m" target="_blank">Bu Ay Tamamlanan</a>
+                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=closed_on:desc&f[]=status_id&op[status_id]=c&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=closed_on&op[closed_on]=m" target="_blank">Bu Ay Tamamlanan</a>
                         </div>
                         <div class="pys-stat-value" id="completed-this-month">
                             <div class="pys-loading-spinner"></div>
