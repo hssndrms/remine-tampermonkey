@@ -247,7 +247,7 @@
                         <div class="pys-time-content">
                             <div class="pys-time-label">
                                 <i class="fas fa-calendar-week"></i>
-                                <a href="${BASE_URL}/time_entries?query_id=215" target="_blank">Bu Hafta</a>
+                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m" target="_blank">Bu Hafta</a>
                             </div>
                             <div class="pys-time-value" id="time-spent-this-week">
                                 <div class="pys-loading-spinner"></div>
