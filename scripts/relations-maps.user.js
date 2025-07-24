@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS İlişki Haritası
 // @namespace    http://tampermonkey.net/
-// @version      2025-07-25
+// @version      2025-07-25-1
 // @description  Redmine issue'lar için modern görünümlü ilişki haritası
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
@@ -31,13 +31,13 @@
         },
         'precedes': {
             label: 'Önce Geliyor',
-            icon: '<i class="fa-solid fa-backward"></i>',
+            icon: '<i class="fa-solid fa-forward"></i>',
             outgoing: 'den önce geliyor',
             incoming: 'den sonra geliyor'
         },
         'follows': {
             label: 'Sonra Geliyor',
-            icon: '<i class="fa-solid fa-forward"></i>',
+            icon: '<i class="fa-solid fa-backward"></i>',
             outgoing: 'den sonra geliyor',
             incoming: 'den önce geliyor'
         },
