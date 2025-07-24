@@ -29,14 +29,20 @@
             outgoing: 'engelleniyor',
             incoming: 'engelliyor'
         },
+        'blocked': {
+            label: 'Engelleniyor',
+            icon: '<i class="fa-solid fa-ban"></i>',
+            outgoing: 'engelliyor',
+            incoming: 'engelleniyor'
+        },
         'precedes': {
-            label: 'Önce Geliyor',
+            label: 'Sonra Geliyor',
             icon: '<i class="fa-solid fa-forward"></i>',
             outgoing: 'den önce geliyor',
             incoming: 'den sonra geliyor'
         },
         'follows': {
-            label: 'Sonra Geliyor',
+            label: 'Önce Geliyor',
             icon: '<i class="fa-solid fa-backward"></i>',
             outgoing: 'den sonra geliyor',
             incoming: 'den önce geliyor'
