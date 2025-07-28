@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-23
+// @version      2025-07-28
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -693,103 +693,107 @@
     }
 
     function fetchTimeSpentThisMonth(params, selector, userId) {
-        const url = new URL(`${BASE_URL}/time_entries.json`);
-        url.searchParams.set("key", API_KEY);
-        url.searchParams.set("limit", 100);
+        const limit = 100;
+        let offset = 0;
+        let allEntries = [];
 
-        // Modify the link within the element to reflect the selected user
-        const labelLink = document.querySelector(selector)?.closest('.pys-time-content')?.querySelector('a');
-        if (labelLink) {
-            let originalHref = labelLink.href;
-            // Replace 'me' or any numeric ID with the actual userId or keep 'me' if userId is 'me'
-            const userIdParam = (userId === 'me') ? 'me' : userId;
-            originalHref = originalHref.replace(/v\[user_id\]\[\]=(me|\d+)/g, `v[user_id][]=${userIdParam}`);
-            labelLink.href = originalHref;
-        }
-
+        const baseUrl = new URL(`${BASE_URL}/time_entries.json`);
+        baseUrl.searchParams.set("key", API_KEY);
 
         for (const key in params) {
             const values = Array.isArray(params[key]) ? params[key] : [params[key]];
             for (const val of values) {
-                url.searchParams.append(key, val);
+                baseUrl.searchParams.append(key, val);
             }
         }
 
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: url.toString(),
-            headers: { "Content-Type": "application/json" },
-            onload: function (response) {
-                try {
-                    const data = JSON.parse(response.responseText);
-                    const element = document.querySelector(selector);
+        async function fetchAllPages() {
+            while (true) {
+                const url = new URL(baseUrl);
+                url.searchParams.set("limit", limit);
+                url.searchParams.set("offset", offset);
 
-                    if (data.time_entries && data.time_entries.length > 0) {
-                        const totalHours = data.time_entries.reduce(
-                            (acc, te) => acc + (te.hours || 0),
-                            0
-                        );
-                        element.innerHTML = `<span class="pys-time-number">${totalHours.toFixed(
-                            1
-                        )}</span>`;
+                const response = await new Promise((resolve, reject) => {
+                    GM_xmlhttpRequest({
+                        method: "GET",
+                        url: url.toString(),
+                        headers: { "Content-Type": "application/json" },
+                        onload: res => resolve(JSON.parse(res.responseText)),
+                        onerror: reject
+                    });
+                });
 
+                if (!response.time_entries || response.time_entries.length === 0) break;
 
-                        // Animate the number
-                        animateNumber(
-                            element.querySelector(".pys-time-number"),
-                            totalHours,
-                            1
-                        );
-                    } else {
-                        element.innerHTML = '<span class="pys-time-number">0.0</span>';
-                    }
+                allEntries = allEntries.concat(response.time_entries);
+                offset += limit;
 
-                    document
-                        .querySelector("#pys-refresh i")
-                        ?.classList.remove("pys-loading"); // Use optional chaining
-                } catch (err) {
-                    console.error("Zaman verisi çekme hatası:", err);
-                    document.querySelector(selector).innerHTML =
-                        '<span class="pys-error">Hata</span>';
-                }
-            },
-            onerror: function () {
-                document.querySelector(selector).innerHTML =
-                    '<span class="pys-error">API Hatası</span>';
-                document.getElementById("pys-refresh")?.classList.remove("pys-loading"); // Use optional chaining
-            },
+                if (offset >= response.total_count) break;
+            }
+
+            // Toplam saat hesapla
+            const totalHours = allEntries.reduce(
+                (acc, te) => acc + (te.hours || 0),
+                0
+            );
+
+            const element = document.querySelector(selector);
+            element.innerHTML = `<span class="pys-time-number">${totalHours.toFixed(1)}</span>`;
+            animateNumber(element.querySelector(".pys-time-number"), totalHours, 1);
+        }
+
+        fetchAllPages().catch(error => {
+            console.error("fetchTimeSpentThisMonth hata:", error);
+            document.querySelector(selector).innerHTML = `<span class="pys-error">API Hatası</span>`;
         });
     }
+
 
     function fetchTimeSpentForChart(spent_on_op, userId) {
-        const url = new URL(`${BASE_URL}/time_entries.json`);
-        url.searchParams.set("key", API_KEY);
-        url.searchParams.set("limit", 100);
+        const limit = 100;
+        let offset = 0;
+        let allEntries = [];
 
-        url.searchParams.append("f[]", "user_id");
-        url.searchParams.set("op[user_id]", "=");
-        url.searchParams.append("v[user_id][]", userId); // Use userId
+        async function fetchAllPages() {
+            while (true) {
+                const url = new URL(`${BASE_URL}/time_entries.json`);
+                url.searchParams.set("key", API_KEY);
+                url.searchParams.set("limit", limit);
+                url.searchParams.set("offset", offset);
 
-        url.searchParams.append("f[]", "spent_on");
-        url.searchParams.set("op[spent_on]", spent_on_op);
+                url.searchParams.append("f[]", "user_id");
+                url.searchParams.set("op[user_id]", "=");
+                url.searchParams.append("v[user_id][]", userId);
 
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: url.toString(),
-            headers: { "Content-Type": "application/json" },
-            onload: function (response) {
-                try {
-                    const data = JSON.parse(response.responseText);
-                    drawActivityPieChart(data.time_entries);
-                } catch (err) {
-                    console.error("Grafik zaman verisi hatası:", err);
-                }
-            },
-            onerror: function () {
-                console.error("Grafik zaman verisi API hatası");
+                url.searchParams.append("f[]", "spent_on");
+                url.searchParams.set("op[spent_on]", spent_on_op);
+
+                const response = await new Promise((resolve, reject) => {
+                    GM_xmlhttpRequest({
+                        method: "GET",
+                        url: url.toString(),
+                        headers: { "Content-Type": "application/json" },
+                        onload: res => resolve(JSON.parse(res.responseText)),
+                        onerror: reject
+                    });
+                });
+
+                if (!response.time_entries || response.time_entries.length === 0) break;
+
+                allEntries = allEntries.concat(response.time_entries);
+                offset += limit;
+
+                if (offset >= response.total_count) break;
             }
+
+            drawActivityPieChart(allEntries);
+        }
+
+        fetchAllPages().catch(err => {
+            console.error("fetchTimeSpentForChart hata:", err);
         });
     }
+
 
 
     function fetchRecentTimeEntries(userId) {
