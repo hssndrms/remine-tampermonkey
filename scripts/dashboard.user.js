@@ -796,8 +796,8 @@
         url.searchParams.set("op[user_id]", "=");
         url.searchParams.append("v[user_id][]", userId);
 
-        url.searchParams.append("f[]", "spent_on");
-        url.searchParams.set("op[spent_on]", spent_on_op);
+                url.searchParams.append("f[]", "spent_on");
+                url.searchParams.set("op[spent_on]", spent_on_op);
 
         const response = await new Promise((resolve, reject) => {
           GM_xmlhttpRequest({
