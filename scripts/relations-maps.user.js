@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS İlişki Haritası
 // @namespace    http://tampermonkey.net/
-// @version      2025-07-25-1
+// @version      2025-08-04
 // @description  Redmine issue'lar için modern görünümlü ilişki haritası
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
@@ -76,7 +76,14 @@
     // API'den issue verilerini al
     async function fetchIssueData(issueId) {
         try {
-            const response = await fetch(`/issues/${issueId}.json?include=relations`);
+            const apiKey = localStorage.getItem('pysRedmineApiKey');
+            if (!apiKey) throw new Error('API anahtarı bulunamadı (pysRedmineApiKey)');
+
+            const response = await fetch(`/issues/${issueId}.json?include=relations`, {
+                headers: {
+                    'X-Redmine-API-Key': apiKey
+                }
+            });
             if (!response.ok) throw new Error('API hatası');
             return await response.json();
         } catch (error) {
