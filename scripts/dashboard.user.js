@@ -247,7 +247,7 @@
                         <div class="pys-time-content">
                             <div class="pys-time-label">
                                 <i class="fas fa-calendar-week"></i>
-                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m" target="_blank">Bu Hafta</a>
+                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on" target="_blank">Bu Hafta</a>
                             </div>
                             <div class="pys-time-value" id="time-spent-this-week">
                                 <div class="pys-loading-spinner"></div>
@@ -258,7 +258,7 @@
                         <div class="pys-time-content">
                             <div class="pys-time-label">
                                 <i class="fas fa-calendar-day"></i>
-                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=t" target="_blank">Bugün</a>
+                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=t&group_by=created_on" target="_blank">Bugün</a>
                             </div>
                             <div class="pys-time-value" id="time-spent-this-day">
                                 <div class="pys-loading-spinner"></div>
@@ -269,7 +269,7 @@
                 </div>
 
                 <div class="pys-time-link">
-                    <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=spent_on" target="_blank" class="pys-btn pys-btn-outline">
+                    <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on" target="_blank" class="pys-btn pys-btn-outline">
                         <i class="fas fa-external-link-alt"></i> Detayları Görüntüle
                     </a>
                 </div>
@@ -610,6 +610,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "m",
+        "group_by":"created_on",
       },
       "#time-spent-this-month",
       userId // Pass userId for link modification
@@ -621,6 +622,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "w",
+        "group_by":"created_on",
       },
       "#time-spent-this-week",
       userId // Pass userId for link modification
@@ -632,6 +634,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "t",
+        "group_by":"created_on",
       },
       "#time-spent-this-day",
       userId // Pass userId for link modification
