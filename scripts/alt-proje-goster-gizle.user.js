@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         PYS Alt Projeleri Göster/Gizle
 // @namespace    https://pys.koton.com.tr
-// @version      2025-08-11
+// @version      2025-08-12
 // @description  PYS projeler sayfasındaki alt projeleri gösterip gizlemek için togglebutton ve checkbox ekler (Font Awesome ile)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/projects
+// @match        https://pys.koton.com.tr/projects?*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/alt-proje-goster-gizle.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/alt-proje-goster-gizle.user.js
