@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2025-08-13
 // @description  issue_assigned_to_id nesnesine hızlı atama linki ekler
-// @author       You
+// @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues/*
 // @match        *://*/redmine/issues/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
