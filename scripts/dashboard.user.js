@@ -5,7 +5,7 @@
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @grant        GM_xmlhttpRequest
 // @connect      pys.koton.com.tr
 // @require      https://cdn.jsdelivr.net/npm/chart.js

@@ -5,7 +5,7 @@
 // @description  Issue satırına gelince son notu tooltip olarak gösterir
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @grant        GM_xmlhttpRequest
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/son-not-goster.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/son-not-goster.user.js

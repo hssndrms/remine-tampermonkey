@@ -5,7 +5,7 @@
 // @description  startdate ile duedate arasındaki farkı hem görüntüleme hem de düzenleme sayfalarında gün bazında gösterir (DOM dinamiğine uyumlu)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/start-due-gun-farki.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/start-due-gun-farki.user.js
 // @grant        none

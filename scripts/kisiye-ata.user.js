@@ -6,7 +6,7 @@
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues/*
 // @match        *://*/redmine/issues/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/kisiye-ata.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/kisiye-ata.user.js
 // @connect      pys.koton.com.tr

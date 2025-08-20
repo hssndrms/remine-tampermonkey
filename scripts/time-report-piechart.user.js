@@ -5,7 +5,7 @@
 // @description  Redmine time report pie chart (Activity vs Total Time)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/time_entries/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @grant        none
 // @require      https://cdn.jsdelivr.net/npm/chart.js
 // @require      https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels

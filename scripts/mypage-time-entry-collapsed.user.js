@@ -5,7 +5,7 @@
 // @description  Time entries tbody içindeki 'odd' tr'lere group class ve expand ikon ekleme, diğerlerini gizle
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://pys.koton.com.tr
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/mypage-time-entry-collapsed.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/mypage-time-entry-collapsed.user.js
 // @grant        none
