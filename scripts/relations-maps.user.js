@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS İlişki Haritası
 // @namespace    http://tampermonkey.net/
-// @version      2025-08-04
+// @version      2025-08-25
 // @description  Redmine issue'lar için modern görünümlü ilişki haritası
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
@@ -67,6 +67,28 @@
         }
     };
 
+    // Tamamlanmış durumlar (Redmine'da genellikle closed durumları)
+    const COMPLETED_STATUS_IDS = [5, 6]; // Bu değerleri sisteminize göre ayarlayın
+    const COMPLETED_STATUS_NAMES = ['Closed', 'Resolved', 'Done', 'Completed', 'Kapandı', 'Çözüldü', 'Tamamlandı'];
+
+    // LocalStorage anahtarları
+    const STORAGE_KEYS = {
+        HIDE_COMPLETED: 'pysRelationMap_hideCompleted'
+    };
+
+    // Ayarları yükle
+    function loadSettings() {
+        const hideCompleted = localStorage.getItem(STORAGE_KEYS.HIDE_COMPLETED);
+        return {
+            hideCompleted: hideCompleted === 'true'
+        };
+    }
+
+    // Ayarları kaydet
+    function saveSettings(settings) {
+        localStorage.setItem(STORAGE_KEYS.HIDE_COMPLETED, settings.hideCompleted.toString());
+    }
+
     // Mevcut issue ID'sini al
     function getCurrentIssueId() {
         const match = window.location.pathname.match(/\/issues\/(\d+)/);
@@ -92,6 +114,53 @@
         }
     }
 
+    // İlişkili issue'ların detaylarını al
+    async function fetchRelatedIssuesDetails(relations) {
+        const apiKey = localStorage.getItem('pysRedmineApiKey');
+        if (!apiKey) return [];
+
+        const issueIds = relations.map(r => r.targetId);
+        const promises = issueIds.map(async (issueId) => {
+            try {
+                const response = await fetch(`/issues/${issueId}.json`, {
+                    headers: {
+                        'X-Redmine-API-Key': apiKey
+                    }
+                });
+                if (!response.ok) throw new Error(`API hatası: ${response.status}`);
+                const data = await response.json();
+                return {
+                    id: issueId,
+                    status: data.issue.status,
+                    subject: data.issue.subject
+                };
+            } catch (error) {
+                console.error(`Issue ${issueId} detayları alınamadı:`, error);
+                return {
+                    id: issueId,
+                    status: { id: 0, name: 'Bilinmiyor' },
+                    subject: 'Başlık alınamadı'
+                };
+            }
+        });
+
+        return await Promise.all(promises);
+    }
+
+    // Issue'ın tamamlanmış olup olmadığını kontrol et
+    function isIssueCompleted(status) {
+        if (!status) return false;
+
+        // ID kontrolü
+        if (COMPLETED_STATUS_IDS.includes(status.id)) {
+            return true;
+        }
+
+        // İsim kontrolü (büyük/küçük harf duyarlı olmayan)
+        const statusName = status.name.toLowerCase();
+        return COMPLETED_STATUS_NAMES.some(name => statusName.includes(name.toLowerCase()));
+    }
+
     // İlişkileri analiz et
     function analyzeRelations(relations, currentIssueId) {
         return relations.map(relation => {
@@ -108,7 +177,7 @@
                     'follows': 'precedes',
                     'duplicates': 'duplicated',
                     'subtask_of': 'parent_task',
-                    'copied_to' :'copied_from'
+                    'copied_to': 'copied_from'
                 };
                 displayType = reverseMap[relationType] || relationType;
             }
@@ -123,20 +192,65 @@
         });
     }
 
+    // Ayarlar panelini oluştur
+    function createSettingsPanel(currentSettings, onSettingsChange) {
+        const settingsPanel = document.createElement('div');
+        settingsPanel.className = 'relation-map-settings';
+        settingsPanel.innerHTML = `
+            <div class="settings-row">
+                <label class="settings-checkbox">
+                    <input type="checkbox" id="hideCompletedCheckbox" ${currentSettings.hideCompleted ? 'checked' : ''}>
+                    <span class="label-text">Tamamlanmış işleri gizle</span>
+                </label>
+            </div>
+        `;
+
+        const checkbox = settingsPanel.querySelector('#hideCompletedCheckbox');
+        checkbox.addEventListener('change', (e) => {
+            const newSettings = {
+                ...currentSettings,
+                hideCompleted: e.target.checked
+            };
+            saveSettings(newSettings);
+            onSettingsChange(newSettings);
+        });
+
+        return settingsPanel;
+    }
+
     // İlişki haritasını oluştur
-    function createRelationMap(relations, currentIssueId) {
+    function createRelationMap(relations, relatedIssuesDetails, currentIssueId, settings) {
+        // İlişkileri filtrele
+        const filteredRelations = relations.filter(relation => {
+            if (!settings.hideCompleted) return true;
+
+            const issueDetail = relatedIssuesDetails.find(detail => detail.id === relation.targetId);
+            return issueDetail ? !isIssueCompleted(issueDetail.status) : true;
+        });
+
         const container = document.createElement('div');
         container.className = 'relation-map-container show';
-        container.innerHTML = `
-            <div class="relation-map-header">
-                <h3 class="relation-map-title"><i class="fa-solid fa-map"></i> İlişki Haritası</h3>
-                <button class="close-btn" onclick="this.closest('.relation-map-container').remove()">×</button>
-            </div>
-            <div class="relation-map-content">
-                ${relations.length === 0 ?
-            '<div class="no-relations">Bu issue için ilişki bulunamadı</div>' :
-        relations.map(relation => `
-                        <div class="relation-item ${relation.displayType}">
+
+        // Ayarlar panel referansı için
+        let settingsPanel;
+
+        const updateContent = (newSettings) => {
+            const content = container.querySelector('.relation-map-content');
+            const newFilteredRelations = relations.filter(relation => {
+                if (!newSettings.hideCompleted) return true;
+
+                const issueDetail = relatedIssuesDetails.find(detail => detail.id === relation.targetId);
+                return issueDetail ? !isIssueCompleted(issueDetail.status) : true;
+            });
+
+            content.innerHTML = newFilteredRelations.length === 0 ?
+                '<div class="no-relations">Bu kriterlere uygun ilişki bulunamadı</div>' :
+                newFilteredRelations.map(relation => {
+                    const issueDetail = relatedIssuesDetails.find(detail => detail.id === relation.targetId);
+                    const isCompleted = issueDetail ? isIssueCompleted(issueDetail.status) : false;
+
+                    return `
+                        <div class="relation-item ${relation.displayType} ${isCompleted ? 'completed' : ''}">
                             <div class="relation-icon">
                                 ${relation.config.icon}
                             </div>
@@ -146,18 +260,75 @@
                                     <span class="direction-arrow">
                                         ${relation.isOutgoing ? '<i class="fa-solid fa-arrow-right"></i>' : '<i class="fa-solid fa-arrow-left"></i>'}
                                     </span>
+                                    ${isCompleted ? '<span class="completed-badge">✓</span>' : ''}
                                 </div>
                                 <div class="relation-target">
                                     <a href="/issues/${relation.targetId}" class="relation-link">
                                         Issue #${relation.targetId}
                                     </a>
+                                    ${issueDetail ? `<div class="issue-subject">${issueDetail.subject}</div>` : ''}
+                                    ${issueDetail ? `<div class="issue-status">${issueDetail.status.name}</div>` : ''}
                                 </div>
                             </div>
                         </div>
-                    `).join('')
-    }
+                    `;
+                }).join('');
+        };
+
+        container.innerHTML = `
+            <div class="relation-map-header">
+                <h3 class="relation-map-title"><i class="fa-solid fa-map"></i> İlişki Haritası</h3>
+                <div class="header-actions">
+                    <button class="settings-toggle-btn" title="Ayarlar">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <button class="close-btn" onclick="this.closest('.relation-map-container').remove()">×</button>
+                </div>
+            </div>
+            <div class="relation-map-content">
+                ${filteredRelations.length === 0 ?
+                    '<div class="no-relations">Bu kriterlere uygun ilişki bulunamadı</div>' :
+                    filteredRelations.map(relation => {
+                        const issueDetail = relatedIssuesDetails.find(detail => detail.id === relation.targetId);
+                        const isCompleted = issueDetail ? isIssueCompleted(issueDetail.status) : false;
+
+                        return `
+                            <div class="relation-item ${relation.displayType} ${isCompleted ? 'completed' : ''}">
+                                <div class="relation-icon">
+                                    ${relation.config.icon}
+                                </div>
+                                <div class="relation-details">
+                                    <div class="relation-type">
+                                        ${relation.config.label}
+                                        <span class="direction-arrow">
+                                            ${relation.isOutgoing ? '<i class="fa-solid fa-arrow-right"></i>' : '<i class="fa-solid fa-arrow-left"></i>'}
+                                        </span>
+                                        ${isCompleted ? '<span class="completed-badge">✓</span>' : ''}
+                                    </div>
+                                    <div class="relation-target">
+                                        <a href="/issues/${relation.targetId}" class="relation-link">
+                                            Issue #${relation.targetId}
+                                        </a>
+                                        ${issueDetail ? `<div class="issue-subject">${issueDetail.subject}</div>` : ''}
+                                        ${issueDetail ? `<div class="issue-status">${issueDetail.status.name}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')
+                }
             </div>
         `;
+
+        // Ayarlar panelini ekle
+        settingsPanel = createSettingsPanel(settings, updateContent);
+        container.appendChild(settingsPanel);
+
+        // Ayarlar toggle butonu event listener
+        const settingsToggleBtn = container.querySelector('.settings-toggle-btn');
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('show');
+        });
 
         return container;
     }
@@ -186,22 +357,32 @@
             button.innerHTML = '<i class="fa-solid fa-hourglass-start"></i>';
             button.disabled = true;
 
-            const issueData = await fetchIssueData(currentIssueId);
+            try {
+                const issueData = await fetchIssueData(currentIssueId);
 
-            button.innerHTML = '<i class="fa-solid fa-map"></i>';
-            button.disabled = false;
+                if (!issueData || !issueData.issue) {
+                    alert('Issue verileri alınamadı!');
+                    return;
+                }
 
-            if (!issueData || !issueData.issue) {
-                alert('Issue verileri alınamadı!');
-                return;
+                const relations = issueData.issue.relations || [];
+                const analyzedRelations = analyzeRelations(relations, currentIssueId);
+
+                // İlişkili issue'ların detaylarını al
+                const relatedIssuesDetails = await fetchRelatedIssuesDetails(analyzedRelations);
+
+                const settings = loadSettings();
+                const mapContainer = createRelationMap(analyzedRelations, relatedIssuesDetails, currentIssueId, settings);
+
+                document.body.appendChild(mapContainer);
+
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('Bir hata oluştu: ' + error.message);
+            } finally {
+                button.innerHTML = '<i class="fa-solid fa-map"></i>';
+                button.disabled = false;
             }
-
-            const relations = issueData.issue.relations || [];
-            const analyzedRelations = analyzeRelations(relations, currentIssueId);
-            const mapContainer = createRelationMap(analyzedRelations, currentIssueId);
-
-            document.body.appendChild(mapContainer);
-
         });
 
         return button;
@@ -212,11 +393,8 @@
         // Sadece issue sayfalarında çalış
         if (!getCurrentIssueId()) return;
 
-        // addStyles();
-
         // Toggle butonunu ekle
         const toggleButton = createToggleButton();
-        // document.body.appendChild(toggleButton);
 
         const relationsDiv = document.getElementById('relations');
         if (relationsDiv) {
@@ -225,7 +403,6 @@
             // Eğer #relations div'i yoksa body'ye ekle
             document.body.appendChild(toggleButton);
         }
-
     }
 
     // Sayfa yüklendiğinde başlat
