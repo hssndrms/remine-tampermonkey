@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-08-29
+// @version      2025-08-29.1
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -77,7 +77,7 @@
             <div class="pys-card-header">
                 <h3><i class="fas fa-tasks"></i> İş Durumu</h3>
                 <div class="pys-new-btn" title="Yeni İş Ekle">
-                    <a href="https://pys.koton.com.tr/projects/finans-isler/issues/new" style="display: flex; align-items: center; gap: 5px;" title="Yeni İş Ekle">
+                    <a href="https://pys.koton.com.tr/projects/finans-isler/issues/new" target="_blank" style="display: flex; align-items: center; gap: 5px;" title="Yeni İş Ekle">
                         <i class="fas fa-plus"></i>
                     </a>
                 </div>
@@ -223,7 +223,7 @@
             <div class="pys-card-header">
                 <h3><i class="fas fa-stopwatch"></i> Zaman Özeti</h3>
                 <div class="pys-new-btn" title="Yeni Zaman Girişi">
-                    <a href="https://pys.koton.com.tr/issues/33605/time_entries/new" target="_blank" style="display: flex; align-items: center; gap: 5px;" title="Yeni Zaman Girişi">
+                    <a href="https://pys.koton.com.tr/issues/33605/time_entries/new" style="display: flex; align-items: center; gap: 5px;" title="Yeni Zaman Girişi">
                         <i class="fas fa-plus"></i>
                     </a>
                 </div>
