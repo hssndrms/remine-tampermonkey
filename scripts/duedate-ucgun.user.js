@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Due Date veya startdate 3 gün içindeyse Renklendir
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-20
+// @version      2025-09-02
 // @description  Duedati bugün olan kayıtlara ait tablodaki satıra dueToday ekler.
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues*
