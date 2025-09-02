@@ -15,36 +15,40 @@
 (function () {
     'use strict';
 
-   // Yardımcı: Tarihleri karşılaştırmak için Date nesnesine çevir
+    // Yardımcı: Tarihleri karşılaştırmak için Date nesnesine çevir
     function parseDate(dateStr) {
         // Redmine'deki tarih formatı: "dd/MM/yyyy"
         const [day, month, year] = dateStr.split('/');
         return new Date(year, month - 1, day);
     }
 
-    // Bugünün tarihi (saatleri sıfırla)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 3 gün sonrası
     const threeDaysLater = new Date(today);
     threeDaysLater.setDate(today.getDate() + 3);
 
-    // Tablodaki tüm <tr> satırlarını kontrol et
     document.querySelectorAll('tr').forEach(tr => {
-        // Eğer satır 'closed' ise (tamamlanmış görev), atla
         if (tr.classList.contains('closed')) return;
-        const dueTd = tr.querySelector('td.due_date');
-        if (dueTd) {
-            const dueText = dueTd.textContent.trim();
-            if (dueText) {
-                const dueDate = parseDate(dueText);
-                if (dueDate >= today && dueDate <= threeDaysLater) {
-                    tr.classList.add('dueToday');
-                }
+
+        // Öncelikle cf_101 kontrol et
+        let dateSource = null;
+        const cf101 = tr.querySelector('td.cf_101');
+        if (cf101 && cf101.textContent.trim()) {
+            dateSource = parseDate(cf101.textContent.trim());
+        } else {
+            // cf_101 yok veya boşsa due_date kullan
+            const dueTd = tr.querySelector('td.due_date');
+            if (dueTd && dueTd.textContent.trim()) {
+                dateSource = parseDate(dueTd.textContent.trim());
             }
         }
 
+        if (dateSource && dateSource >= today && dateSource <= threeDaysLater) {
+            tr.classList.add('dueToday');
+        }
+
+        // start_date kısmı olduğu gibi kalacak
         const startTd = tr.querySelector('td.start_date');
         if (startTd) {
             const startText = startTd.textContent.trim();
@@ -55,7 +59,6 @@
                 }
             }
         }
-
     });
-})();
 
+})();
