@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Start-Due Süresi Gösterimi
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-19
+// @version      2025-09-02
 // @description  startdate ile duedate arasındaki farkı hem görüntüleme hem de düzenleme sayfalarında gün bazında gösterir (DOM dinamiğine uyumlu)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues/*
@@ -49,7 +49,6 @@
                 durationElement.textContent = `Süre: ${diffDays + 1} gün`;
                 durationElement.style.fontWeight = 'bold';
                 durationElement.style.color = getColorByDayCount(diffDays);
-                durationElement.style.marginTop = '5px';
 
                 dueDateElement.parentElement.appendChild(durationElement);
             }
