@@ -134,6 +134,7 @@
         if (changes.length === 0) {
             const empty = document.createElement("p");
             empty.textContent = "Herhangi bir değişiklik bulunamadı.";
+            empty.style.color = "var(--warning)";
             modal.appendChild(empty);
         } else {
             // Tablo oluştur
