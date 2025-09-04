@@ -23,7 +23,7 @@
     }
 
     const sidebar = document.querySelector('#sidebar');
-    if (!sidebar || sidebar.children.length === 0) return;
+    if (!sidebar || sidebar.children.length === 1) return;
 
     // Daha önce kaydedilmiş sidebar durumu varsa al
     let sidebarVisible = localStorage.getItem('pysSidebarVisible');
