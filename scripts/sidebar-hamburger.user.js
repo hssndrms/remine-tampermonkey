@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Sidebar Göster/Gizle
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-14
+// @version      2025-09-04
 // @description  Sidebar'ı Hamburger İkonu ile Gizle/Göster, durumu hatırla (Font Awesome ile)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
@@ -23,7 +23,7 @@
     }
 
     const sidebar = document.querySelector('#sidebar');
-    if (!sidebar || sidebar.children.length === 0) return;
+    if (!sidebar || sidebar.children.length === 1) return;
 
     // Daha önce kaydedilmiş sidebar durumu varsa al
     let sidebarVisible = localStorage.getItem('pysSidebarVisible');
