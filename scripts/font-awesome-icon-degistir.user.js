@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS 😎 Iconları Font Awesome ile Değiştir
 // @namespace    https://fontawesome.com/icons
-// @version      2025-07-14
+// @version      2025-09-04
 // @description  Redmine'deki icon-* sınıflarını Font Awesome ikonlarla değiştirir. Dinamik içerik desteği (MutationObserver) ile tam uyum sağlar.
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
@@ -72,6 +72,8 @@
                 if (el.classList.contains('project') && el.classList.contains('leaf')) return;
 
                 el.classList.remove(oldClass);
+
+                el.querySelectorAll('svg').forEach(svg => svg.remove());
 
                 const icon = document.createElement('i');
                 faClasses.split(' ').forEach(cls => icon.classList.add(cls));
