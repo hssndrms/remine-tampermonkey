@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Sidebar Göster/Gizle
 // @namespace    https://pys.koton.com.tr
-// @version      2025-07-14
+// @version      2025-09-04
 // @description  Sidebar'ı Hamburger İkonu ile Gizle/Göster, durumu hatırla (Font Awesome ile)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
