@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS özelleştirilmiş Zorunlu Alanlar - ID Kontrollü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-08-13
+// @version      2025-09-05
 // @author       hssndrms
 // @description  Redmine'daki bazı zorunlu olmayan alanları ID'den kontrol ederek zorunluymuş gibi kontrol eder, eksikse hata divi ekler
 // @match        https://pys.koton.com.tr/projects/*/issues/new
@@ -44,7 +44,7 @@
 
         const errorDiv = document.createElement('div');
         errorDiv.id = 'errorExplanation';
-       
+
         const ul = document.createElement('ul');
         errorMessages.forEach(msg => {
             const li = document.createElement('li');
@@ -63,12 +63,17 @@
     }
 
     function validateForm(form) {
+        form.querySelectorAll('.cls_important').forEach(el => {
+            el.classList.remove('cls_important');
+            el.style.border = '';
+        });
+
         let isValid = true;
         let messages = [];
 
         requiredFields.forEach(([fieldId, labelText]) => {
             const el = document.getElementById(fieldId);
-            
+
             if (!el) return;
 
             const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
@@ -78,10 +83,12 @@
 
             if (isInput && el.value.trim() === '') {
                 el.style.border = '2px solid red';
+                el.classList.add('cls_important');
                 messages.push(`${labelText} boş bırakılamaz`);
                 isValid = false;
             } else if (isSelect && (el.selectedIndex === -1 || el.value === '')) {
                 el.style.border = '2px solid red';
+                el.classList.add('cls_important');
                 messages.push(`${labelText} seçilmelidir`);
                 isValid = false;
             }
