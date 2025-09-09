@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-08-29.1
+// @version      2025-09-09
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -448,7 +448,7 @@
 
         const link = item.querySelector("a");
         if (link) {
-          window.open(link.href, "_blank");
+          window.open(link.href, "_self");
         }
       });
     });
