@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Due Date History
 // @namespace    https://pys.koton.com.tr
-// @version      2025-09-02
+// @version      2025-09-15
 // @description  Issue duedate değişikliklerini göster
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*issues/*
@@ -14,9 +14,41 @@
 (function() {
     'use strict';
 
+    // ===============================
+    // KONFIGÜRASYON ALANI - Yeni alanlar buraya eklenir
+    // ===============================
+    const FIELD_CONFIGS = [
+        {
+            selector: ".due-date",           // HTML selector
+            fieldName: "due_date",           // API'deki field name
+            title: "Termin Tarihi Değişiklikleri",
+            tooltip: "Termin tarihi değişiklikleri"
+        },
+        {
+            selector: ".cf_101",             
+            fieldName: "101",                 
+            title: "Revize Termin Tarihi Değişiklikleri",
+            tooltip: "Revize termin tarihi değişiklikleri"
+        },
+        {
+            selector:".start-date",
+            fieldName: "start_date",
+            title: "Başlangıç Tarihi Değişiklikleri",
+            tooltip: "Başlangıç tarihi değişiklikleri."
+        }
+        // Yeni alanlar için örnek:
+        // {
+        //     selector: ".cf_102",
+        //     fieldName: "102",
+        //     title: "Başka Alan Değişiklikleri",
+        //     tooltip: "Başka alan değişiklikleri"
+        // }
+    ];
+
     // API bilgileri
     const API_KEY = localStorage.getItem("pysRedmineApiKey");
     const BASE_URL = "https://pys.koton.com.tr";
+    const issueId = window.location.pathname.match(/issues\/(\d+)/)[1];
 
     // Stil ekle (modern modal görünümü)
     GM_addStyle(`
@@ -62,30 +94,12 @@
         }
     `);
 
-    // Issue ID’yi URL’den al
-    const issueId = window.location.pathname.match(/issues\/(\d+)/)[1];
+    // ===============================
+    // TEMEL FONKSİYONLAR
+    // ===============================
 
-    // due-date divi bul
-    const dueDateDiv = document.querySelector(".due-date");
-    if (dueDateDiv) {
-        // İkon ekle
-        const icon = document.createElement("i");
-        icon.className = "fa-solid fa-clock-rotate-left";
-        icon.style.cursor = "pointer";
-        icon.title = "Termin tarihi değişiklikleri";
-        dueDateDiv.appendChild(icon);
-        dueDateDiv.style.display = "flex";
-        dueDateDiv.style.alignItems = "center";  
-        dueDateDiv.style.gap = "5px";           
-
-        icon.addEventListener("click", async () => {
-            const changes = await fetchDueDateChanges(issueId);
-            showModal(changes);
-        });
-    }
-
-    // API çağrısı ile değişiklikleri çek
-    async function fetchDueDateChanges(issueId) {
+    // API çağrısı ile field değişikliklerini çek (generic)
+    async function fetchFieldChanges(issueId, fieldName) {
         try {
             const res = await fetch(`${BASE_URL}/issues/${issueId}.json?include=journals`, {
                 headers: {
@@ -94,21 +108,40 @@
             });
             const data = await res.json();
             const journals = data.issue.journals || [];
-            // Sadece due_date değişikliklerini filtrele
-            return journals.filter(j => j.details && j.details.some(d => d.name === "due_date"))
+
+            // Sadece belirtilen field değişikliklerini filtrele
+            return journals.filter(j => j.details && j.details.some(d => d.name === fieldName))
                 .map(j => ({
-                user: j.user.name,
-                created_on: j.created_on,
-                changes: j.details.filter(d => d.name === "due_date")
-            }));
+                    user: j.user.name,
+                    created_on: j.created_on,
+                    changes: j.details.filter(d => d.name === fieldName)
+                }));
         } catch (err) {
             console.error(err);
             return [];
         }
     }
 
-    // Modal göster
-    function showModal(changes) {
+    // İkon ekleme fonksiyonu (generic)
+    function addIconToField(fieldDiv, config) {
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-clock-rotate-left";
+        icon.style.cursor = "pointer";
+        icon.title = config.tooltip;
+
+        fieldDiv.appendChild(icon);
+        fieldDiv.style.display = "flex";
+        fieldDiv.style.alignItems = "center";
+        fieldDiv.style.gap = "5px";
+
+        icon.addEventListener("click", async () => {
+            const changes = await fetchFieldChanges(issueId, config.fieldName);
+            showModal(changes, config.title);
+        });
+    }
+
+    // Modal göster fonksiyonu
+    function showModal(changes, title) {
         // Overlay
         const overlay = document.createElement("div");
         overlay.className = "duedate-overlay";
@@ -127,9 +160,9 @@
         };
 
         modal.appendChild(closeBtn);
-        const title = document.createElement("h2");
-        title.textContent = "Termin Tarihi Değişiklikleri";
-        modal.appendChild(title);
+        const titleElement = document.createElement("h2");
+        titleElement.textContent = title;
+        modal.appendChild(titleElement);
 
         if (changes.length === 0) {
             const empty = document.createElement("p");
@@ -142,39 +175,47 @@
             table.style.width = "100%";
             table.style.borderCollapse = "collapse";
             table.innerHTML = `
-        <thead>
-            <tr>
-                <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Değişikliği Yapan</th>
-                <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Değişiklik Tarihi</th>
-                <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Önce</th>
-                <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Sonra</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    `;
-
-    const tbody = table.querySelector("tbody");
-
-    changes.forEach(c => {
-        c.changes.forEach(change => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td style="padding:8px; border-bottom:1px solid #eee;">${c.user}</td>
-                <td style="padding:8px; border-bottom:1px solid #eee;">${new Date(c.created_on).toLocaleString()}</td>
-                <td style="padding:8px; border-bottom:1px solid #eee;">${change.old_value || "-"}</td>
-                <td style="padding:8px; border-bottom:1px solid #eee;">${change.new_value || "-"}</td>
+                <thead>
+                    <tr>
+                        <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Değişikliği Yapan</th>
+                        <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Değişiklik Tarihi</th>
+                        <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Önce</th>
+                        <th style="border-bottom:1px solid #ddd; padding:8px; text-align:left;">Sonra</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
             `;
-            tbody.appendChild(row);
-        });
-    });
 
-    modal.appendChild(table);
-}
+            const tbody = table.querySelector("tbody");
 
+            changes.forEach(c => {
+                c.changes.forEach(change => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${c.user}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${new Date(c.created_on).toLocaleString()}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${change.old_value || "-"}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${change.new_value || "-"}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
 
+            modal.appendChild(table);
+        }
 
         document.body.appendChild(overlay);
         document.body.appendChild(modal);
     }
+
+    // ===============================
+    // MAIN EXECUTION - Konfigürasyona göre çalışır
+    // ===============================
+    FIELD_CONFIGS.forEach(config => {
+        const fieldDiv = document.querySelector(config.selector);
+        if (fieldDiv) {
+            addIconToField(fieldDiv, config);
+        }
+    });
 
 })();
