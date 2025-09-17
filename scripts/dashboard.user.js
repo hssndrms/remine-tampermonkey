@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-09-09
+// @version      2025-09-17
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -873,7 +873,7 @@
             }
 
             const hours = entry.hours != null ? entry.hours.toFixed(1) : "0.0";
-            const editLink = `<a title="Edit" href="/time_entries/${entry.id}/edit" data-iconified="true" target="_blank"> <i class="fa-solid fa-pen-to-square" title="Edit" style="margin-left: 8px;"></i></a>`;
+            const editLink = `<a title="Edit" href="/time_entries/${entry.id}/edit" data-iconified="true"> <i class="fa-solid fa-pen-to-square" title="Edit" style="margin-left: 8px;"></i></a>`;
 
             tbody.insertAdjacentHTML(
               "beforeend",
