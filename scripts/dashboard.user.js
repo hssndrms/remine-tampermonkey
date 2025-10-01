@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-09-17
+// @version      2025-10-01
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -24,6 +24,7 @@
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const YESTERDAY = yesterday.toISOString().split("T")[0];
+  const milestoneICSorumlusu = "Hasan Durmuş";
 
   // Font Awesome yükle
   if (
@@ -54,270 +55,351 @@
   // Modern Dashboard HTML
   const dashboardHTML = `
 <div class="pys-dashboard-wrapper">
-    <div class="pys-dashboard-header">
-        <h2><i class="fas fa-tachometer-alt"></i> PYS Dashboard</h2>
-        <div class="pys-header-controls">
-            <select id="pys-user-select" class="pys-select">
-                <option value="me"><<me>></option>
-            </select>
-            <button id="pys-add-user-option" class="pys-btn pys-btn-sm" title="Yeni Kullanıcı Ekle">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button id="pys-load-user-data" class="pys-btn pys-btn-sm" title="Seçilen Kullanıcıya Göre Verileri Yükle">
-                <i class="fas fa-user-check"></i>
-            </button>
-            <div class="pys-refresh-btn" id="pys-refresh" title="Verileri Yenile">
-                <i class="fas fa-sync-alt"></i>
-            </div>
+  <div class="pys-dashboard-header">
+    <h2><i class="fas fa-tachometer-alt"></i> PYS Dashboard</h2>
+    <div class="pys-header-controls">
+      <select id="pys-user-select" class="pys-select">
+        <option value="me"><<me>></option>
+      </select>
+      <button
+        id="pys-add-user-option"
+        class="pys-btn pys-btn-sm"
+        title="Yeni Kullanıcı Ekle">
+        <i class="fas fa-plus"></i>
+      </button>
+      <button
+        id="pys-load-user-data"
+        class="pys-btn pys-btn-sm"
+        title="Seçilen Kullanıcıya Göre Verileri Yükle">
+        <i class="fas fa-user-check"></i>
+      </button>
+      <div class="pys-refresh-btn" id="pys-refresh" title="Verileri Yenile">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="pys-dashboard-grid">
+    <div class="pys-card pys-card-primary">
+      <div class="pys-card-header">
+        <h3><i class="fas fa-tasks"></i> İş Durumu</h3>
+        <div class="pys-new-btn" title="Yeni İş Ekle">
+          <a
+            href="https://pys.koton.com.tr/projects/finans-isler/issues/new"
+            target="_blank"
+            style="display: flex; align-items: center; gap: 5px"
+            title="Yeni İş Ekle">
+            <i class="fas fa-plus"></i>
+          </a>
         </div>
+      </div>
+      <div class="pys-card-body">
+        <div class="pys-stat-row">
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-open">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o"
+                  target="_blank"
+                  >Açık İşler</a
+                >
+              </div>
+              <div class="pys-stat-value" id="open-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-open">
+              <i class="far fa-star"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]==&v[status_id][]=17"
+                  target="_blank"
+                  >Yeni İşler</a
+                >
+              </div>
+              <div class="pys-stat-value" id="new-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pys-stat-row">
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-overdue">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=<%3D&v[due_date][]=${YESTERDAY}"
+                  target="_blank"
+                  >Gecikmiş İşler</a
+                >
+              </div>
+              <div class="pys-stat-value" id="overdue-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-completed">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=t"
+                  target="_blank"
+                  >Bugün Terminli İşler</a
+                >
+              </div>
+              <div class="pys-stat-value" id="due-today-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pys-stat-row">
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-week">
+              <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=w"
+                  target="_blank"
+                  >Bu Hafta Terminli</a
+                >
+              </div>
+              <div class="pys-stat-value" id="due-this-week-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-month">
+              <i class="fas fa-calendar-days"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=m"
+                  target="_blank"
+                  >Bu Ay Terminli</a
+                >
+              </div>
+              <div class="pys-stat-value" id="due-this-month-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pys-stat-row">
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-completed">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=closed_on:desc&f[]=status_id&op[status_id]=c&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=closed_on&op[closed_on]=m"
+                  target="_blank"
+                  >Bu Ay Tamamlanan</a
+                >
+              </div>
+              <div class="pys-stat-value" id="completed-this-month">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-completed">
+              <i class="far fa-star"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=subject&f[]=status_id&op[status_id]=o&f[]=cf_20&op[cf_20]==&v[cf_20][]=me&f[]=start_date&op[start_date]=w"
+                  target="_blank"
+                  >Bu hafta Başlanacak</a
+                >
+              </div>
+              <div class="pys-stat-value" id="start-this-week">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pys-stat-row">
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-watched">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?set_filter=1&f[]=status_id&op[status_id]=o&f[]=watcher_id&op[watcher_id]==&v[watcher_id][]=me"
+                  target="_blank"
+                  >İzlediğim İşler</a
+                >
+              </div>
+              <div class="pys-stat-value" id="watched-issues">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pys-stat-item">
+            <div class="pys-stat-icon pys-stat-overdue">
+              <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <div class="pys-stat-content">
+              <div class="pys-stat-label">
+                <a
+                  href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=status_id&op[status_id]=o&f[]=tracker_id&op[tracker_id]==&v[tracker_id][]=26&f[]=project.cf_85&op[project.cf_85]=~&v[project.cf_85][]=${milestoneICSorumlusu}&f[]=due_date&op[due_date]=<=&v[due_date][]=${YESTERDAY}"
+                  target="_blank"
+                  >Gecikmiş Milestone</a
+                >
+              </div>
+              <div class="pys-stat-value" id="overdue-milestone">
+                <div class="pys-loading-spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="pys-dashboard-grid">
-        <div class="pys-card pys-card-primary">
-            <div class="pys-card-header">
-                <h3><i class="fas fa-tasks"></i> İş Durumu</h3>
-                <div class="pys-new-btn" title="Yeni İş Ekle">
-                    <a href="https://pys.koton.com.tr/projects/finans-isler/issues/new" target="_blank" style="display: flex; align-items: center; gap: 5px;" title="Yeni İş Ekle">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="pys-card-body">
-              <div class="pys-stat-row">
-                <div class="pys-stat-item">
-                    <div class="pys-stat-icon pys-stat-open">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="pys-stat-content">
-                        <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o" target="_blank">Açık İşler</a>
-                        </div>
-                        <div class="pys-stat-value" id="open-issues">
-                            <div class="pys-loading-spinner"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pys-stat-item">
-                    <div class="pys-stat-icon pys-stat-open">
-                        <i class="far fa-star"></i>
-                    </div>
-                    <div class="pys-stat-content">
-                        <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]==&v[status_id][]=17" target="_blank">Yeni İşler</a>
-                        </div>
-                        <div class="pys-stat-value" id="new-issues">
-                            <div class="pys-loading-spinner"></div>
-                        </div>
-                    </div>
-                </div>
-
+    <div class="pys-card pys-card-secondary">
+      <div class="pys-card-header">
+        <h3><i class="fas fa-stopwatch"></i> Zaman Özeti</h3>
+        <div class="pys-new-btn" title="Yeni Zaman Girişi">
+          <a
+            href="https://pys.koton.com.tr/issues/33605/time_entries/new"
+            style="display: flex; align-items: center; gap: 5px"
+            title="Yeni Zaman Girişi">
+            <i class="fas fa-plus"></i>
+          </a>
+        </div>
+      </div>
+      <div class="pys-card-body pys-time-summary">
+        <div class="pys-time-display">
+          <div class="pys-time-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="pys-time-content-row">
+            <div class="pys-time-content">
+              <div class="pys-time-label">
+                <i class="fas fa-calendar-days"></i> Bu Ay
               </div>
 
-                <div class="pys-stat-row">
-                    <div class="pys-stat-item">
-                        <div class="pys-stat-icon pys-stat-overdue">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="pys-stat-content">
-                            <div class="pys-stat-label">
-                                <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=<%3D&v[due_date][]=${YESTERDAY}" target="_blank">Gecikmiş İşler</a>
-                            </div>
-                            <div class="pys-stat-value" id="overdue-issues">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pys-stat-item">
-                        <div class="pys-stat-icon pys-stat-completed">
-                            <i class="fas fa-calendar-day"></i>
-                        </div>
-                        <div class="pys-stat-content">
-                            <div class="pys-stat-label">
-                                <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=t" target="_blank">Bugün Terminli İşler</a>
-                            </div>
-                            <div class="pys-stat-value" id="due-today-issues">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pys-stat-row">
-                    <div class="pys-stat-item">
-                        <div class="pys-stat-icon pys-stat-week">
-                            <i class="fas fa-calendar-week"></i>
-                        </div>
-                        <div class="pys-stat-content">
-                            <div class="pys-stat-label">
-                                <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=w" target="_blank">Bu Hafta Terminli</a>
-                            </div>
-                            <div class="pys-stat-value" id="due-this-week-issues">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pys-stat-item">
-                        <div class="pys-stat-icon pys-stat-month">
-                            <i class="fas fa-calendar-days"></i>
-                        </div>
-                        <div class="pys-stat-content">
-                            <div class="pys-stat-label">
-                                <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=status_id&op[status_id]=o&f[]=due_date&op[due_date]=m" target="_blank">Bu Ay Terminli</a>
-                            </div>
-                            <div class="pys-stat-value" id="due-this-month-issues">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <div class="pys-stat-row">
-                <div class="pys-stat-item">
-                    <div class="pys-stat-icon pys-stat-completed">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="pys-stat-content">
-                        <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=closed_on:desc&f[]=status_id&op[status_id]=c&f[]=assigned_to_id&op[assigned_to_id]==&v[assigned_to_id][]=me&f[]=closed_on&op[closed_on]=m" target="_blank">Bu Ay Tamamlanan</a>
-                        </div>
-                        <div class="pys-stat-value" id="completed-this-month">
-                            <div class="pys-loading-spinner"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pys-stat-item">
-                    <div class="pys-stat-icon pys-stat-completed">
-                        <i class="far fa-star"></i>
-                    </div>
-                    <div class="pys-stat-content">
-                        <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?utf8=✓&set_filter=1&sort=subject&f[]=status_id&op[status_id]=o&f[]=cf_20&op[cf_20]==&v[cf_20][]=me&f[]=start_date&op[start_date]=w" target="_blank">Bu hafta Başlanacak</a>
-                        </div>
-                        <div class="pys-stat-value" id="start-this-week">
-                            <div class="pys-loading-spinner"></div>
-                        </div>
-                    </div>
-                </div>
-
+              <div class="pys-time-value" id="time-spent-this-month">
+                <div class="pys-loading-spinner"></div>
+              </div>
+              <div class="pys-time-unit">saat</div>
             </div>
-                <div class="pys-stat-item">
-                    <div class="pys-stat-icon pys-stat-watched">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div class="pys-stat-content">
-                        <div class="pys-stat-label">
-                            <a href="${BASE_URL}/issues?set_filter=1&f[]=status_id&op[status_id]=o&f[]=watcher_id&op[watcher_id]==&v[watcher_id][]=me" target="_blank">İzlediğim İşler</a>
-                        </div>
-                        <div class="pys-stat-value" id="watched-issues">
-                            <div class="pys-loading-spinner"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="pys-divider"></div>
+            <div class="pys-time-content">
+              <div class="pys-time-label">
+                <i class="fas fa-calendar-week"></i>
+                <a
+                  href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on"
+                  target="_blank"
+                  >Bu Hafta</a
+                >
+              </div>
+              <div class="pys-time-value" id="time-spent-this-week">
+                <div class="pys-loading-spinner"></div>
+              </div>
+              <div class="pys-time-unit">saat</div>
             </div>
+            <div class="pys-divider"></div>
+            <div class="pys-time-content">
+              <div class="pys-time-label">
+                <i class="fas fa-calendar-day"></i>
+                <a
+                  href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=t&group_by=created_on"
+                  target="_blank"
+                  >Bugün</a
+                >
+              </div>
+              <div class="pys-time-value" id="time-spent-this-day">
+                <div class="pys-loading-spinner"></div>
+              </div>
+              <div class="pys-time-unit">saat</div>
+            </div>
+          </div>
         </div>
 
-        <div class="pys-card pys-card-secondary">
-            <div class="pys-card-header">
-                <h3><i class="fas fa-stopwatch"></i> Zaman Özeti</h3>
-                <div class="pys-new-btn" title="Yeni Zaman Girişi">
-                    <a href="https://pys.koton.com.tr/issues/33605/time_entries/new" style="display: flex; align-items: center; gap: 5px;" title="Yeni Zaman Girişi">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="pys-card-body pys-time-summary">
-                <div class="pys-time-display">
-                    <div class="pys-time-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="pys-time-content-row">
-                        <div class="pys-time-content">
-                            <div class="pys-time-label"><i class="fas fa-calendar-days"></i> Bu Ay</div>
-
-                            <div class="pys-time-value" id="time-spent-this-month">
-                                <div class="pys-loading-spinner"></div>
-
-                            </div>
-                            <div class="pys-time-unit">saat</div>
-                        </div>
-                        <div class ="pys-divider"> </div>
-                        <div class="pys-time-content">
-                            <div class="pys-time-label">
-                                <i class="fas fa-calendar-week"></i>
-                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on" target="_blank">Bu Hafta</a>
-                            </div>
-                            <div class="pys-time-value" id="time-spent-this-week">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                            <div class="pys-time-unit">saat</div>
-                        </div>
-                        <div class ="pys-divider"> </div>
-                        <div class="pys-time-content">
-                            <div class="pys-time-label">
-                                <i class="fas fa-calendar-day"></i>
-                                <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=t&group_by=created_on" target="_blank">Bugün</a>
-                            </div>
-                            <div class="pys-time-value" id="time-spent-this-day">
-                                <div class="pys-loading-spinner"></div>
-                            </div>
-                            <div class="pys-time-unit">saat</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pys-time-link">
-                    <a href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on" target="_blank" class="pys-btn pys-btn-outline">
-                        <i class="fas fa-external-link-alt"></i> Detayları Görüntüle
-                    </a>
-                </div>
-
-                <h4 class="pys-time-table-header"><i class="fas fa-list-ol"></i> Son 10 Zaman Kaydı</h4>
-                <div class="pys-time-table-wrapper">
-                    <table class="pys-time-table">
-                        <thead>
-                            <tr>
-                                <th>Aktivite</th>
-                                <th>Issue</th>
-                                <th>Notlar</th>
-                                <th>Saat</th>
-                                <th class="th-actions"><i class="fa-solid fa-ellipsis-h" title="Actions"></i></th>
-                            </tr>
-                        </thead>
-                        <tbody id="pys-time-table-body">
-                            <tr>
-                                <td colspan="5">Yükleniyor...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="pys-time-link">
+          <a
+            href="${BASE_URL}/time_entries?set_filter=1&sort=subject&f[]=user_id&op[user_id]==&v[user_id][]=me&f[]=spent_on&op[spent_on]=m&group_by=created_on"
+            target="_blank"
+            class="pys-btn pys-btn-outline">
+            <i class="fas fa-external-link-alt"></i> Detayları Görüntüle
+          </a>
         </div>
 
-        <div class="pys-card pys-card-tertiary">
-            <div class="pys-card-header">
-                <h3><i class="fas fa-chart-pie"></i> Aktivite Dağılımı</h3>
-                <select id="pys-card-pie-select" name="tarihSecimi">
-                  <option value="m">Bu Ay</option>
-                  <option value="w">Bu Hafta</option>
-                  <option value="t">Bugün</option>
-                </select>
-            </div>
-            <div class="pys-card-body">
-                <canvas id="activity-pie-chart" width="300" height="300"></canvas>
-            </div>
+        <h4 class="pys-time-table-header">
+          <i class="fas fa-list-ol"></i> Son 10 Zaman Kaydı
+        </h4>
+        <div class="pys-time-table-wrapper">
+          <table class="pys-time-table">
+            <thead>
+              <tr>
+                <th>Aktivite</th>
+                <th>Issue</th>
+                <th>Notlar</th>
+                <th>Saat</th>
+                <th class="th-actions">
+                  <i class="fa-solid fa-ellipsis-h" title="Actions"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="pys-time-table-body">
+              <tr>
+                <td colspan="5">Yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
 
-    <div class="pys-dashboard-footer">
-        <div class="pys-last-updated">
-            Son güncellenme: <span id="pys-last-update">-</span>
-        </div>
+    <div class="pys-card pys-card-tertiary">
+      <div class="pys-card-header">
+        <h3><i class="fas fa-chart-pie"></i> Aktivite Dağılımı</h3>
+        <select id="pys-card-pie-select" name="tarihSecimi">
+          <option value="m">Bu Ay</option>
+          <option value="w">Bu Hafta</option>
+          <option value="t">Bugün</option>
+        </select>
+      </div>
+      <div class="pys-card-body">
+        <canvas id="activity-pie-chart" width="300" height="300"></canvas>
+      </div>
     </div>
+  </div>
+
+  <div class="pys-dashboard-footer">
+    <div class="pys-last-updated">
+      Son güncellenme: <span id="pys-last-update">-</span>
+    </div>
+  </div>
 </div>
-
 `;
 
   const target = document.querySelector("#content");
@@ -603,6 +685,21 @@
       userId // Pass userId for link modification
     );
 
+    fetchCount(
+      {
+        "f[]": ["status_id", "tracker_id", "project.cf_85", "due_date"],
+        "op[status_id]": "o",
+        "op[tracker_id]": "=",
+        "op[project.cf_85]": "~",
+        "op[due_date]": "<=",
+        "v[tracker_id][]": "26",
+        "v[project.cf_85][]": [milestoneICSorumlusu],
+        "v[due_date][]": [YESTERDAY],
+      },
+      "#overdue-milestone",
+      userId // Pass userId for link modification
+    );
+
     // Bu ayki harcanan toplam zaman
     fetchTimeSpentThisMonth(
       {
@@ -610,7 +707,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "m",
-        "group_by":"created_on",
+        group_by: "created_on",
       },
       "#time-spent-this-month",
       userId // Pass userId for link modification
@@ -622,7 +719,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "w",
-        "group_by":"created_on",
+        group_by: "created_on",
       },
       "#time-spent-this-week",
       userId // Pass userId for link modification
@@ -634,7 +731,7 @@
         "op[user_id]": "=",
         "v[user_id][]": [userId], // Use userId
         "op[spent_on]": "t",
-        "group_by":"created_on",
+        group_by: "created_on",
       },
       "#time-spent-this-day",
       userId // Pass userId for link modification
@@ -799,8 +896,8 @@
         url.searchParams.set("op[user_id]", "=");
         url.searchParams.append("v[user_id][]", userId);
 
-                url.searchParams.append("f[]", "spent_on");
-                url.searchParams.set("op[spent_on]", spent_on_op);
+        url.searchParams.append("f[]", "spent_on");
+        url.searchParams.set("op[spent_on]", spent_on_op);
 
         const response = await new Promise((resolve, reject) => {
           GM_xmlhttpRequest({
