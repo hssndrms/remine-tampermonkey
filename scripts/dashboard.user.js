@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-10-01
+// @version      2025-10-06
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -383,6 +383,7 @@
       <div class="pys-card-header">
         <h3><i class="fas fa-chart-pie"></i> Aktivite Dağılımı</h3>
         <select id="pys-card-pie-select" name="tarihSecimi">
+          <option value="lm">Geçen Ay</option>
           <option value="m">Bu Ay</option>
           <option value="w">Bu Hafta</option>
           <option value="t">Bugün</option>
