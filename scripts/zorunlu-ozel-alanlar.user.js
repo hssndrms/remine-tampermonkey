@@ -107,11 +107,26 @@
         return isValid;
     }
 
+    function observeFormChanges() {
+    const target = document.querySelector('#issue-form') || document.body;
+    if (!target) return;
+
+    const observer = new MutationObserver(() => {
+        addRequiredStars(); // yeni alanlar geldiğinde tekrar yıldız ekle
+    });
+
+    observer.observe(target, {
+        childList: true,
+        subtree: true
+    });
+    }
+
     window.addEventListener('load', function () {
         const form = document.querySelector('form#issue-form');
         if (!form) return;
 
         addRequiredStars();
+        observeFormChanges();
 
         form.addEventListener('submit', function(e) {
             const valid = validateForm(form);
