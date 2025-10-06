@@ -49,7 +49,11 @@
         const errorDiv = document.createElement('div');
         errorDiv.id = 'errorExplanation';
 
+<<<<<<< HEAD
         const icon = document.createElement("i");
+=======
+         const icon = document.createElement("i");
+>>>>>>> 3aa49fe497d3c062898619721fefafbf17215a8a
         icon.className = "fa-solid fa-circle-exclamation pys-error-icon";
 
         errorDiv.prepend(icon);
