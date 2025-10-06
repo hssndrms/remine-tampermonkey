@@ -105,8 +105,10 @@
         });
 
         requiredFields.forEach(([fieldId, labelText]) => {
+            const el = document.getElementById(fieldId);
+            if (!el) return; // Alan yoksa geç
+
             const label = document.querySelector(`label[for="${fieldId}"]`);
-            const item = document.getElementById(fieldId);
 
             if (!label && item) {
                 // Label yoksa mesaj ekle
