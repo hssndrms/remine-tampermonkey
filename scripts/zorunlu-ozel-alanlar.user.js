@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS özelleştirilmiş Zorunlu Alanlar - ID Kontrollü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-10-08
+// @version      2025-10-07
 // @author       hssndrms
 // @description  Redmine'daki bazı zorunlu olmayan alanları ID'den kontrol ederek zorunluymuş gibi kontrol eder, eksikse hata divi ekler
 // @match        https://pys.koton.com.tr/projects/*/issues/new
@@ -48,6 +48,11 @@
 
         const errorDiv = document.createElement('div');
         errorDiv.id = 'errorExplanation';
+
+         const icon = document.createElement("i");
+        icon.className = "fa-solid fa-circle-exclamation pys-error-icon";
+
+        errorDiv.prepend(icon);
 
         const ul = document.createElement('ul');
         errorMessages.forEach(msg => {
