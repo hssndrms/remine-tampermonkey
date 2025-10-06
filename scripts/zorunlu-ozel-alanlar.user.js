@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS özelleştirilmiş Zorunlu Alanlar - ID Kontrollü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-10-07
+// @version      2025-10-07.1
 // @author       hssndrms
 // @description  Redmine'daki bazı zorunlu olmayan alanları ID'den kontrol ederek zorunluymuş gibi kontrol eder, eksikse hata divi ekler
 // @match        https://pys.koton.com.tr/projects/*/issues/new
@@ -106,8 +106,9 @@
 
         requiredFields.forEach(([fieldId, labelText]) => {
             const label = document.querySelector(`label[for="${fieldId}"]`);
+            const item = document.getElementById(fieldId);
 
-            if (!label) {
+            if (!label && item) {
                 // Label yoksa mesaj ekle
                 messages.push(`${labelText} seçilmelidir`);
                 isValid = false;
