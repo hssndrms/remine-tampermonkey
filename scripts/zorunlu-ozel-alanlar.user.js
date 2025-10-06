@@ -110,7 +110,7 @@
 
             const label = document.querySelector(`label[for="${fieldId}"]`);
 
-            if (!label && item) {
+            if (!label) {
                 // Label yoksa mesaj ekle
                 messages.push(`${labelText} seçilmelidir`);
                 isValid = false;
