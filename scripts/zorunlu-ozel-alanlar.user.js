@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS özelleştirilmiş Zorunlu Alanlar - ID Kontrollü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-10-06
+// @version      2025-10-07
 // @author       hssndrms
 // @description  Redmine'daki bazı zorunlu olmayan alanları ID'den kontrol ederek zorunluymuş gibi kontrol eder, eksikse hata divi ekler
 // @match        https://pys.koton.com.tr/projects/*/issues/new
@@ -75,28 +75,47 @@
         let isValid = true;
         let messages = [];
 
-        requiredFields.forEach(([fieldId, labelText]) => {
-            const el = document.getElementById(fieldId);
 
-            if (!el) return;
+        const requiredLabels = document.querySelectorAll('label');
+        requiredLabels.forEach(label => {
+            // label içinde .required span var mı?
+            const hasRequiredSpan = label.querySelector('span.required');
+            if (!hasRequiredSpan) return;
 
-            const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
-            const isSelect = el.tagName === 'SELECT';
+            const fieldId = label.getAttribute('for');
+            if (!fieldId) return;
+            const field = document.getElementById(fieldId);
+            if (!field) return;
 
-            el.style.border = ''; // sıfırla
+            const labelText = label.textContent.replace('*', '').trim();
+            const isInput = ['INPUT', 'TEXTAREA'].includes(field.tagName);
+            const isSelect = field.tagName === 'SELECT';
 
-            if (isInput && el.value.trim() === '') {
-                el.style.border = '2px solid red';
-                el.classList.add('cls_important');
+            if (isInput && field.value.trim() === '') {
+                field.style.border = '2px solid red';
+                field.classList.add('cls_important');
                 messages.push(`${labelText} boş bırakılamaz`);
                 isValid = false;
-            } else if (isSelect && (el.selectedIndex === -1 || el.value === '')) {
-                el.style.border = '2px solid red';
-                el.classList.add('cls_important');
+            } else if (isSelect && (field.selectedIndex === -1 || field.value === '')) {
+                field.style.border = '2px solid red';
+                field.classList.add('cls_important');
                 messages.push(`${labelText} seçilmelidir`);
                 isValid = false;
             }
         });
+
+        requiredFields.forEach(([fieldId, labelText]) => {
+            const label = document.querySelector(`label[for="${fieldId}"]`);
+
+            if (!label) {
+                // Label yoksa mesaj ekle
+                messages.push(`${labelText} seçilmelidir`);
+                isValid = false;
+            }
+            // Label varsa geç, hiçbir şey yapma
+        });
+
+
 
         if (!isValid) {
             showErrorBox(messages);
@@ -108,17 +127,17 @@
     }
 
     function observeFormChanges() {
-    const target = document.querySelector('#issue-form') || document.body;
-    if (!target) return;
+        const target = document.querySelector('#issue-form') || document.body;
+        if (!target) return;
 
-    const observer = new MutationObserver(() => {
-        addRequiredStars(); // yeni alanlar geldiğinde tekrar yıldız ekle
-    });
+        const observer = new MutationObserver(() => {
+            addRequiredStars(); // yeni alanlar geldiğinde tekrar yıldız ekle
+        });
 
-    observer.observe(target, {
-        childList: true,
-        subtree: true
-    });
+        observer.observe(target, {
+            childList: true,
+            subtree: true
+        });
     }
 
     window.addEventListener('load', function () {
