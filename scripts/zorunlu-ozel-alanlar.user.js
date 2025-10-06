@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS özelleştirilmiş Zorunlu Alanlar - ID Kontrollü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-09-05
+// @version      2025-10-06
 // @author       hssndrms
 // @description  Redmine'daki bazı zorunlu olmayan alanları ID'den kontrol ederek zorunluymuş gibi kontrol eder, eksikse hata divi ekler
 // @match        https://pys.koton.com.tr/projects/*/issues/new
@@ -23,14 +23,18 @@
     ];
 
     function addRequiredStars() {
-        requiredFields.forEach(([fieldId, labelText]) => {
-            const el = document.getElementById(fieldId);
-            if (!el) return;
-
+        requiredFields.forEach(([fieldId]) => {
             const label = document.querySelector(`label[for="${fieldId}"]`);
-            if (label && !label.innerHTML.includes('*')) {
-                label.innerHTML += ' <span style="color:var(--warning)">*</span>';
-            }
+            if (!label) return;
+
+            // Eğer zaten bir * varsa tekrar ekleme
+            if (label.querySelector('.required')) return;
+
+            const star = document.createElement('span');
+            star.className = 'required';
+            star.textContent = ' *';
+
+            label.appendChild(star);
         });
     }
 
