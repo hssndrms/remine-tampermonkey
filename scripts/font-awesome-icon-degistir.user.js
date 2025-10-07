@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS 😎 Iconları Font Awesome ile Değiştir
 // @namespace    https://fontawesome.com/icons
-// @version      2025-10-07
+// @version      2025-10-08
 // @description  Redmine'deki icon-* sınıflarını Font Awesome ikonlarla değiştirir. Dinamik içerik desteği (MutationObserver) ile tam uyum sağlar.
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
@@ -66,7 +66,8 @@
         'icon-warning': 'fa-solid fa-triangle-exclamation',
         'icon-time-entry': 'fa-regular fa-clock',
         'icon-issue-note': 'fa-regular fa-note-sticky',
-        'icon-issue': 'fa-solid fa-ticket-simple'
+        'icon-issue': 'fa-solid fa-ticket-simple',
+        'icon-issue-closed': 'fa-solid fa-check-double'
     };
 
     function processIcons(root = document) {
