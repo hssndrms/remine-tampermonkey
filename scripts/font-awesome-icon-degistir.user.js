@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS 😎 Iconları Font Awesome ile Değiştir
 // @namespace    https://fontawesome.com/icons
-// @version      2025-10-081
+// @version      2025-10-08
 // @description  Redmine'deki icon-* sınıflarını Font Awesome ikonlarla değiştirir. Dinamik içerik desteği (MutationObserver) ile tam uyum sağlar.
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
