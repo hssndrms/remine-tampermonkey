@@ -67,7 +67,8 @@
         'icon-time-entry': 'fa-regular fa-clock',
         'icon-issue-note': 'fa-regular fa-note-sticky',
         'icon-issue': 'fa-solid fa-ticket-simple',
-        'icon-issue-closed': 'fa-solid fa-check-double'
+        'icon-issue-closed': 'fa-regular fa-square-check',
+        'icon-issue-open': 'fa-regular fa-square'
     };
 
     function processIcons(root = document) {
