@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         PYS İlişki Haritası (Tamamlanmış Gizle)
+// @name         PYS İlişki Haritası
 // @namespace    http://tampermonkey.net/
 // @version      2025-10-16.5
 // @description  Redmine issue'lar için modern görünümlü ilişki haritası (Tamamlanmış işleri gizle özelliği)
