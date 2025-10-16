@@ -6,8 +6,8 @@
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=redmine.org
-// @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/relations-map-depth-v3.user.js
-// @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/relations-map-depth-v3.user.js
+// @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/relations-map.user.js
+// @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/relations-map.user.js
 // @require      https://d3js.org/d3.v7.min.js
 // @grant        none
 // ==/UserScript==
