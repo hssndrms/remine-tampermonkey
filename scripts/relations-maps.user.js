@@ -36,6 +36,7 @@
         subtask_of: { label: 'Alt Görev', icon: '<i class="fa-solid fa-diagram-subtask"></i>' },
         copied_to: { label: 'Kopyalandı', icon: '<i class="fas fa-copy"></i>' },
         copied_from: { label: 'Kopyalandı', icon: '<i class="fas fa-copy"></i>' },
+        center: { label: 'Bu iş', icon: '<i class="fa-solid fa-arrows-to-dot"></i>' }
     };
 
     const getSettings = () => {
@@ -231,19 +232,31 @@
                 if (extras.length === 0) {
                     extraDiv.innerHTML = '<div class="relation-item">Ek ilişki yok</div>';
                 } else {
-                    extraDiv.innerHTML = extras.map(rel => {
-                        const rid = rel.issue_to_id || rel.issue_id;
-                        return `<div class="relation-item">
-                            <div class="relation-icon"><i class="fa-solid fa-link"></i></div>
-                            <div class="relation-details">
-                                <a href="/issues/${rid}" class="relation-link">#${rid}</a>
-                                <div>${rel.relation_type}</div>
-                            </div>
-                        </div>`;
-                    }).join('');
+                    const cards = [];
+                    const innerMargin = 5
+                    for (const r of extras) {
+                        const det = await fetchIssue(r.issue_to_id || r.issue_id);
+                        const cardHtml = renderCard(det, 1, r.relation_type);
+
+                        // DOM olarak parse et
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = cardHtml;
+
+                        // relation-item elementini bul ve margin-left güncelle
+                        const relationItem = tempDiv.querySelector('.relation-item');
+                        if (relationItem) {
+                            relationItem.style.marginLeft = innerMargin + 'px';
+                        }
+
+                        // HTML’i tekrar al ve listeye ekle
+                        cards.push(tempDiv.innerHTML);
+                    }
+                    extraDiv.innerHTML = cards.join('');
+
                 }
 
-                el.after(extraDiv);
+
+                el.insertAdjacentElement('afterend', extraDiv);
             });
         });
 
