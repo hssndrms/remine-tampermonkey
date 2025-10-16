@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         PYS İlişki Haritası
+// @name         PYS İlişki Haritası (Tamamlanmış Gizle)
 // @namespace    http://tampermonkey.net/
-// @version      2025-10-16
-// @description  Redmine issue'lar için modern görünümlü ilişki haritası
+// @version      2025-10-16.5
+// @description  Redmine issue'lar için modern görünümlü ilişki haritası (Tamamlanmış işleri gizle özelliği)
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
@@ -16,55 +16,22 @@
     'use strict';
 
     const API_KEY = localStorage.getItem('pysRedmineApiKey');
-    if (!API_KEY) {
-        console.warn('pysRedmineApiKey bulunamadı.');
-    }
-
     const STORAGE_KEY = 'pysRelationSettings';
     const defaultSettings = { hideCompleted: false, prevDepth: 1, nextDepth: 3 };
 
-    // 🔗 İlişki türü açıklamaları
+    const COMPLETED_STATUS_NAMES = ['Closed', 'Resolved', 'Done', 'Completed', 'Kapandı', 'Çözüldü', 'Tamamlandı'];
+
     const relationConfig = {
-        relates: {
-            label: 'İlişkili',
-            icon: '<i class="fas fa-link"></i>',
-        },
-        blocks: {
-            label: 'Engelliyor',
-            icon: '<i class="fa-solid fa-ban"></i>',
-        },
-        blocked: {
-            label: 'Engelleniyor',
-            icon: '<i class="fa-solid fa-ban"></i>',
-        },
-        precedes: {
-            label: 'Sonra Geliyor',
-            icon: '<i class="fa-solid fa-forward"></i>',
-        },
-        follows: {
-            label: 'Önce Geliyor',
-            icon: '<i class="fa-solid fa-backward"></i>',
-        },
-        duplicates: {
-            label: 'Tekrarı',
-            icon: '<i class="fa-solid fa-repeat"></i>',
-        },
-        subtask_of: {
-            label: 'Alt Görev',
-            icon: '<i class="fa-solid fa-diagram-subtask"></i>',
-        },
-        copied_to: {
-            label: 'Kopyalandı',
-            icon: '<i class="fas fa-copy"></i>',
-        },
-        copied_from: {
-            label: 'Kopyalandı',
-            icon: '<i class="fas fa-copy"></i>',
-        },
-        current: {
-            label: "Bu İş",
-            icon: '<i class="fas fa-circle"></i>',
-        }
+        relates: { label: 'İlişkili', icon: '<i class="fas fa-link"></i>' },
+        blocks: { label: 'Engelliyor', icon: '<i class="fa-solid fa-ban"></i>' },
+        blocked: { label: 'Engelleniyor', icon: '<i class="fa-solid fa-ban"></i>' },
+        precedes: { label: 'Sonra Geliyor', icon: '<i class="fa-solid fa-forward"></i>' },
+        follows: { label: 'Önce Geliyor', icon: '<i class="fa-solid fa-backward"></i>' },
+        duplicates: { label: 'Tekrarı', icon: '<i class="fa-solid fa-repeat"></i>' },
+        subtask_of: { label: 'Alt Görev', icon: '<i class="fa-solid fa-diagram-subtask"></i>' },
+        copied_to: { label: 'Kopyalandı', icon: '<i class="fas fa-copy"></i>' },
+        copied_from: { label: 'Kopyalandı', icon: '<i class="fas fa-copy"></i>' },
+        current: { label: "Bu İş", icon: '<i class="fas fa-circle"></i>' }
     };
 
     const getSettings = () => {
@@ -89,7 +56,40 @@
         return json.issue;
     }
 
-    // 🔁 Derinlikli ilişkiler
+    function isIssueCompleted(status) {
+        if (!status) return false;
+        if (status.id && [5, 6].includes(status.id)) return true;
+        const name = status.name?.toLowerCase();
+        return COMPLETED_STATUS_NAMES.some(n => name?.includes(n.toLowerCase()));
+    }
+
+    const renderCard = (iss, level = 0, type = '', hideCompleted = false) => {
+        const relCfg = relationConfig[type] || { label: type, icon: '<i class="fa-solid fa-link"></i>' };
+        const isCompleted = isIssueCompleted(iss.status);
+        if (hideCompleted && isCompleted) return ''; // Tamamlanmış gizle
+
+        const paddingLeft = level * 16;
+        return `
+            <div class="relation-item ${type} ${isCompleted ? 'completed' : ''}" style="margin-left:${paddingLeft}px" data-issue-id="${iss.id}">
+                <div class="relation-icon">${relCfg.icon}</div>
+                <div class="relation-details">
+                    <div class="relation-type">
+                        ${relCfg.label}
+                        <span class="direction-arrow">${
+                            type === 'follows' ? '<i class="fa-solid fa-arrow-left"></i>' :
+                            type === 'precedes' ? '<i class="fa-solid fa-arrow-right"></i>' : ''
+                        }</span>
+                        ${isCompleted ? '<span class="completed-badge">✓</span>' : ''}
+                    </div>
+                    <div class="relation-target">
+                        <a href="/issues/${iss.id}" class="relation-link">#${iss.id}</a>
+                        <div class="issue-subject">${iss.subject}</div>
+                        <div class="issue-status">${iss.status?.name || ''}</div>
+                    </div>
+                </div>
+            </div>`;
+    };
+
     async function fetchDeepRelations(issueId, direction, depth, currentDepth = 0, visited = new Set()) {
         if (currentDepth >= depth || visited.has(issueId)) return [];
         visited.add(issueId);
@@ -98,10 +98,8 @@
         const relations = issue.relations || [];
 
         let targetRelations = relations.filter((r) => {
-            if (direction === 'next')
-                return r.relation_type === 'precedes' && r.issue_id === issueId;
-            if (direction === 'prev')
-                return r.relation_type === 'precedes' && r.issue_to_id === issueId;
+            if (direction === 'next') return r.relation_type === 'precedes' && r.issue_id === issueId;
+            if (direction === 'prev') return r.relation_type === 'precedes' && r.issue_to_id === issueId;
             return false;
         });
 
@@ -120,27 +118,26 @@
         const panel = document.createElement('div');
         panel.className = 'relation-map-settings';
         panel.innerHTML = `
-			<div class="settings-row">
-				<label class="settings-checkbox">
-					<input type="checkbox" id="hideCompleted" ${settings.hideCompleted ? 'checked' : ''}>
-					<span class="label-text">Tamamlanmış işleri gizle</span>
-				</label>
-			</div>
-			<div class="settings-row">
-				<label>Önceki Derinlik:</label>
-				<input type="number" id="prevDepth" min="0" max="10" value="${settings.prevDepth}" style="width:60px;">
-			</div>
-			<div class="settings-row">
-				<label>Sonraki Derinlik:</label>
-				<input type="number" id="nextDepth" min="0" max="10" value="${settings.nextDepth}" style="width:60px;">
-			</div>
-			<div class="settings-row" style="text-align:right;">
-				<button id="saveSettingsBtn" class="save-btn">
-					<i class="fa-solid fa-floppy-disk"></i> Kaydet
-				</button>
-			</div>
-		`;
-
+            <div class="settings-row">
+                <label class="settings-checkbox">
+                    <input type="checkbox" id="hideCompleted" ${settings.hideCompleted ? 'checked' : ''}>
+                    <span class="label-text">Tamamlanmış işleri gizle</span>
+                </label>
+            </div>
+            <div class="settings-row">
+                <label>Önceki Derinlik:</label>
+                <input type="number" id="prevDepth" min="0" max="10" value="${settings.prevDepth}" style="width:60px;">
+            </div>
+            <div class="settings-row">
+                <label>Sonraki Derinlik:</label>
+                <input type="number" id="nextDepth" min="0" max="10" value="${settings.nextDepth}" style="width:60px;">
+            </div>
+            <div class="settings-row" style="text-align:right;">
+                <button id="saveSettingsBtn" class="save-btn">
+                    <i class="fa-solid fa-floppy-disk"></i> Kaydet
+                </button>
+            </div>
+        `;
         panel.querySelector('#saveSettingsBtn').addEventListener('click', () => {
             const newSettings = {
                 hideCompleted: panel.querySelector('#hideCompleted').checked,
@@ -151,7 +148,6 @@
             onSave(newSettings);
             panel.classList.remove('show');
         });
-
         return panel;
     }
 
@@ -159,15 +155,15 @@
         const container = document.createElement('div');
         container.className = 'relation-map-container show';
         container.innerHTML = `
-			<div class="relation-map-header">
-				<h3 class="relation-map-title"><i class="fa-solid fa-map"></i> İlişki Haritası</h3>
-				<div class="header-actions">
-					<button class="settings-toggle-btn" title="Ayarlar"><i class="fa-solid fa-gear"></i></button>
-					<button class="close-btn">×</button>
-				</div>
-			</div>
-			<div class="relation-map-content"><div class="no-relations">Yükleniyor...</div></div>
-		`;
+            <div class="relation-map-header">
+                <h3 class="relation-map-title"><i class="fa-solid fa-map"></i> İlişki Haritası</h3>
+                <div class="header-actions">
+                    <button class="settings-toggle-btn" title="Ayarlar"><i class="fa-solid fa-gear"></i></button>
+                    <button class="close-btn">×</button>
+                </div>
+            </div>
+            <div class="relation-map-content"><div class="no-relations">Yükleniyor...</div></div>
+        `;
 
         const content = container.querySelector('.relation-map-content');
         const settingsPanel = createSettingsPanel(settings, async (newSettings) => {
@@ -185,126 +181,27 @@
             fetchIssue(issueId),
         ]);
 
-        const renderCard = (iss, level = 0, type = '') => {
-            const relCfg = relationConfig[type] || { label: type, icon: '<i class="fa-solid fa-link"></i>' };
-            const paddingLeft = level * 16;
-            return `
-				<div class="relation-item ${type}" style="margin-left:${paddingLeft}px" data-issue-id="${iss.id}">
-					<div class="relation-icon">${relCfg.icon}</div>
-					<div class="relation-details">
-						<div class="relation-type">
-							${relCfg.label}
-							<span class="direction-arrow">${
-								type === 'follows'
-                ? '<i class="fa-solid fa-arrow-left"></i>'
-            : type === 'precedes'
-                ? '<i class="fa-solid fa-arrow-right"></i>'
-            : ''
-        }</span>
-						</div>
-						<div class="relation-target">
-							<a href="/issues/${iss.id}" class="relation-link">#${iss.id}</a>
-							<div class="issue-subject">${iss.subject}</div>
-							<div class="issue-status">${iss.status?.name || ''}</div>
-						</div>
-					</div>
-				</div>`;
-        };
-
         let html = '';
-        prevRels.reverse().forEach((r, i) => (html += renderCard(r.issue, i, 'follows')));
-        html += renderCard(currentIssue, 0, 'current');
-        nextRels.forEach((r, i) => (html += renderCard(r.issue, i + 1, 'precedes')));
+        prevRels.reverse().forEach((r, i) => html += renderCard(r.issue, i, 'follows', settings.hideCompleted));
+        html += renderCard(currentIssue, 0, 'current', settings.hideCompleted);
+        nextRels.forEach((r, i) => html += renderCard(r.issue, i + 1, 'precedes', settings.hideCompleted));
 
-        // Ana işin diğer ilişkileri
-        const otherRels = currentIssue.relations.filter((r) => !['precedes'].includes(r.relation_type));
-
+        const otherRels = currentIssue.relations.filter(r => !['precedes'].includes(r.relation_type));
         if (otherRels.length > 0) {
-            html += `<div class="relation-item"><strong>Diğer İlişkiler:</strong></div>`;
+            html += '<div class="other-relations">';
             for (const r of otherRels) {
                 const relIssue = await fetchIssue(r.issue_to_id || r.issue_id);
-                html += renderCard(relIssue, 1, r.relation_type);
+                html += renderCard(relIssue, 1, r.relation_type, settings.hideCompleted);
             }
+            html += '</div>';
         }
 
-        content.innerHTML = html;
-
-        // 🔘 Sonraki işlere tıklayınca ilişkileri göster
-        content.querySelectorAll('.relation-item.precedes').forEach((el) => {
-            el.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const issueId = el.dataset.issueId;
-                const issue = await fetchIssue(issueId);
-                const extras = issue.relations.filter((r) => !['precedes', 'follows'].includes(r.relation_type));
-
-                const nextSibling = el.nextElementSibling;
-                if (nextSibling && nextSibling.classList.contains('extra-relations')) {
-                    nextSibling.remove();
-                    return;
-                }
-
-                const extraDiv = document.createElement('div');
-                extraDiv.className = 'extra-relations';
-
-                const currentMargin = parseInt(window.getComputedStyle(el).marginLeft) || 0;
-                extraDiv.style.marginLeft = `${currentMargin}px`;
-
-                if (extras.length === 0) {
-                    extraDiv.innerHTML = '<div class="relation-item relates"><div class="relation-details"><em>Ek ilişki yok</em></div></div>';
-                } else {
-                    const cards = [];
-                    const innerMargin = 5
-                    for (const r of extras) {
-                        const det = await fetchIssue(r.issue_to_id || r.issue_id);
-                        const cardHtml = renderCard(det, 1, r.relation_type);
-
-                        // DOM olarak parse et
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = cardHtml;
-
-                        // relation-item elementini bul ve margin-left güncelle
-                        const relationItem = tempDiv.querySelector('.relation-item');
-                        if (relationItem) {
-                            relationItem.style.marginLeft = innerMargin + 'px';
-                        }
-
-                        // HTML’i tekrar al ve listeye ekle
-                        cards.push(tempDiv.innerHTML);
-                    }
-                    extraDiv.innerHTML = cards.join('');
-
-                }
-
-
-                el.insertAdjacentElement('afterend', extraDiv);
-            });
-        });
-
+        content.innerHTML = html || '<div class="no-relations">İlişki bulunamadı.</div>';
+        document.body.appendChild(container);
         return container;
     }
 
-    function createToggleButton() {
-        const btn = document.createElement('button');
-        btn.className = 'toggle-btn';
-        btn.innerHTML = '<i class="fa-solid fa-map"></i>';
-        btn.onclick = async () => {
-            const existing = document.querySelector('.relation-map-container');
-            if (existing) return existing.remove();
-            const issueId = getIssueId();
-            const settings = getSettings();
-            const map = await buildRelationMap(issueId, settings);
-            document.body.appendChild(map);
-        };
-        return btn;
-    }
-
-    function init() {
-        const relDiv = document.getElementById('relations');
-        const btn = createToggleButton();
-        if (relDiv) relDiv.insertBefore(btn, relDiv.firstChild);
-        else document.body.appendChild(btn);
-    }
-
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
+    const settings = getSettings();
+    const issueId = getIssueId();
+    if (issueId) buildRelationMap(issueId, settings);
 })();
