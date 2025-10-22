@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Tema Seçici
 // @namespace    https://pys.koton.com.tr
-// @version      0.1
+// @version      2025-10-22
 // @author       hssndrms
 // @description  Redmine için tema seçici ekler
 // @match        https://pys.koton.com.tr/*
@@ -29,6 +29,7 @@
         <option value="theme-mint">Mint</option>
         <option value="theme-leopard">Leopard</option>
         <option value="theme-blue">Sky</option>
+        <option value="theme-modern-navy">Modern Navy</option>
     `;
     selector.style.marginRight = '10px';
 
