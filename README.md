@@ -1,6 +1,6 @@
 # redmine-tampermonkey
 
-Dasboard, icon değişikliği gibi scriptlerin doğru şekilde çalışabilmesi için Stylus benzeri bir eklenti ile CSS injection yapılmalı. <a href="https://github.com/hssndrms/remine-tampermonkey/blob/master/PYS_public_koton.css" target="_blank">PYS_public_koton.css</a> dosyası kullanılmalı
+Dasboard, icon değişikliği gibi scriptlerin doğru şekilde çalışabilmesi için Stylus benzeri bir eklenti ile CSS injection yapılmalı. <a href="https://userstyles.world/api/style/23120.user.css" target="_blank">PYS_public_koton.css</a> dosyası kullanılmalı
 
 
 | Dosya Adı                              | Script Adı                                      | Açıklama                                                                 | Yükle |
