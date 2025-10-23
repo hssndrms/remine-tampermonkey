@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Parent task Duedate kontrolü
 // @namespace    https://pys.koton.com.tr
-// @version      2025-06-27
+// @version      2025-10-23
 // @description  Subtask tarihlerine göre parent duedate geri tarihli ise arka planın rengi uygular
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/issues/*
@@ -51,17 +51,8 @@
     if (anyLater) {
         // Yeni uyarı div'i oluştur
         const warningDiv = document.createElement('div');
+        warningDiv.classList = 'warning-duadate';
         warningDiv.textContent = 'İleri tarihli subtask var';
-        warningDiv.style.background = 'var(--warning)';
-        warningDiv.style.color = 'var(--text-primary)';
-        warningDiv.style.padding = '1px 4px';
-        warningDiv.style.borderRadius = '6px';
-        warningDiv.style.fontWeight = 'bold';
-        warningDiv.style.display = 'inline-block';
-        warningDiv.style.marginLeft = '8px';
-
-        // due-date value div'inin hemen sonrasına ekle
-        //parentDueDiv.insertAdjacentElement('afterend', warningDiv);
         parentDueDiv.appendChild(warningDiv);
     }
 })();
