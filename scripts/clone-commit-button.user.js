@@ -4,7 +4,7 @@
 // @version      2025-10-24.1
 // @description  Redmine'daki orijinal commit (Create/Save) butonunu birebir klonlayarak #issue-form içindeki #all_attributes bölümünün üst sağına ekler. DOM ve AJAX yüklemelerinde otomatik yenilenir. İşlevi tamamen aynıdır.
 // @author       hssndrms
-// @match        https://pys.koton.com.tr*issues/*
+// @match        https://pys.koton.com.tr/*issues/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/clone-commit-button.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/clone-commit-button.user.js
