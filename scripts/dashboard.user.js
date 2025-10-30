@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PYS Dashboard 📊 Gösterge Paneli + Zaman Özeti (Modern)
 // @namespace    https://pys.koton.com.tr
-// @version      2025-10-15
+// @version      2025-10-30
 // @description  Modern görünümlü Redmine dashboard - İş sayıları ve zaman özeti
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/my/page
@@ -361,6 +361,7 @@
             <thead>
               <tr>
                 <th>Aktivite</th>
+                <th>Gün</th>
                 <th>Issue</th>
                 <th>Notlar</th>
                 <th>Saat</th>
@@ -371,7 +372,7 @@
             </thead>
             <tbody id="pys-time-table-body">
               <tr>
-                <td colspan="5">Yükleniyor...</td>
+                <td colspan="6">Yükleniyor...</td>
               </tr>
             </tbody>
           </table>
@@ -462,80 +463,80 @@
                 const userId = prompt(
                     `"${userName}" için kullanıcı ID'sini girin (Redmine'daki ID):`
         );
-          if (!userId || isNaN(userId)) {
-              alert("Geçerli bir kullanıcı ID'si girilmelidir.");
-              return;
-          }
+                if (!userId || isNaN(userId)) {
+                    alert("Geçerli bir kullanıcı ID'si girilmelidir.");
+                    return;
+                }
 
-          let customUsers = JSON.parse(
-              localStorage.getItem("pysCustomUsers") || "[]"
-          );
-          // Check if user already exists
-          if (customUsers.some((u) => u.id === userId)) {
-              alert("Bu kullanıcı ID'si zaten mevcut.");
-              return;
-          }
+                let customUsers = JSON.parse(
+                    localStorage.getItem("pysCustomUsers") || "[]"
+                );
+                // Check if user already exists
+                if (customUsers.some((u) => u.id === userId)) {
+                    alert("Bu kullanıcı ID'si zaten mevcut.");
+                    return;
+                }
 
-          customUsers.push({ id: userId, name: userName });
-          localStorage.setItem("pysCustomUsers", JSON.stringify(customUsers));
+                customUsers.push({ id: userId, name: userName });
+                localStorage.setItem("pysCustomUsers", JSON.stringify(customUsers));
 
-          // Re-populate the select to include the new user, then select it and load data
-          fetchUsersAndPopulateSelect(function () {
-              userSelect.value = userId;
-              selectedUserId = userId; // Update selectedUserId after setting select value
-              localStorage.setItem("pysSelectedUserId", selectedUserId);
-              loadAllData(selectedUserId);
-          });
-      });
+                // Re-populate the select to include the new user, then select it and load data
+                fetchUsersAndPopulateSelect(function () {
+                    userSelect.value = userId;
+                    selectedUserId = userId; // Update selectedUserId after setting select value
+                    localStorage.setItem("pysSelectedUserId", selectedUserId);
+                    loadAllData(selectedUserId);
+                });
+            });
+        }
+
+        // Refresh butonu event listener
+        document
+            .getElementById("pys-refresh")
+            .addEventListener("click", function () {
+            var innerElement = this.querySelector("i"); // i yerine başka bir tag veya class seçebilirsin
+            if (innerElement) {
+                innerElement.classList.add("pys-loading");
+            }
+
+            loadAllData(selectedUserId); // Pass selected user ID
+
+            const refreshBtn = this;
+            // Küçük bir gecikme ile kaldırmak için:
+            setTimeout(() => {
+                // var innerElement = refreshBtn.querySelector("i");
+                if (innerElement) {
+                    innerElement.classList.remove("pys-loading");
+                }
+            }, 1200);
+        });
+
+        document.querySelectorAll(".pys-stat-item").forEach(function (item) {
+            item.addEventListener("click", function (e) {
+                // Tıklanan yer zaten linkse, tekrar işlem yapma
+                if (e.target.tagName.toLowerCase() === "a") return;
+
+                // İçerideki linki bul
+                const link = item.querySelector("a");
+                if (link) {
+                    // Yeni sekmede aç
+                    window.open(link.href, "_blank");
+                }
+            });
+        });
+
+        document.querySelectorAll(".pys-new-btn").forEach(function (item) {
+            item.addEventListener("click", function (e) {
+                // Eğer tıklanan öğe veya üstlerinden biri <a> ise, kendi davranışı çalışsın, ekstra işlem yapma
+                if (e.target.closest("a")) return;
+
+                const link = item.querySelector("a");
+                if (link) {
+                    window.open(link.href, "_self");
+                }
+            });
+        });
     }
-
-      // Refresh butonu event listener
-      document
-          .getElementById("pys-refresh")
-          .addEventListener("click", function () {
-          var innerElement = this.querySelector("i"); // i yerine başka bir tag veya class seçebilirsin
-          if (innerElement) {
-              innerElement.classList.add("pys-loading");
-          }
-
-          loadAllData(selectedUserId); // Pass selected user ID
-
-          const refreshBtn = this;
-          // Küçük bir gecikme ile kaldırmak için:
-          setTimeout(() => {
-              // var innerElement = refreshBtn.querySelector("i");
-              if (innerElement) {
-                  innerElement.classList.remove("pys-loading");
-              }
-          }, 1200);
-      });
-
-      document.querySelectorAll(".pys-stat-item").forEach(function (item) {
-          item.addEventListener("click", function (e) {
-              // Tıklanan yer zaten linkse, tekrar işlem yapma
-              if (e.target.tagName.toLowerCase() === "a") return;
-
-              // İçerideki linki bul
-              const link = item.querySelector("a");
-              if (link) {
-                  // Yeni sekmede aç
-                  window.open(link.href, "_blank");
-              }
-          });
-      });
-
-      document.querySelectorAll(".pys-new-btn").forEach(function (item) {
-          item.addEventListener("click", function (e) {
-              // Eğer tıklanan öğe veya üstlerinden biri <a> ise, kendi davranışı çalışsın, ekstra işlem yapma
-              if (e.target.closest("a")) return;
-
-              const link = item.querySelector("a");
-              if (link) {
-                  window.open(link.href, "_self");
-              }
-          });
-      });
-  }
 
     // fetchUsersAndPopulateSelect now accepts a callback
     function fetchUsersAndPopulateSelect(callback) {
@@ -784,42 +785,42 @@
                 /v\[user_id\]\[\]=(me|\d+)/g,
                 `v[user_id][]=${userIdParam}`
       ); // Add this for consistency, though it's typically for time entries
-        labelLink.href = originalHref;
+            labelLink.href = originalHref;
+        }
+
+        for (const key in params) {
+            const values = Array.isArray(params[key]) ? params[key] : [params[key]];
+            for (const val of values) {
+                url.searchParams.append(key, val);
+            }
+        }
+
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: url.toString(),
+            headers: { "Content-Type": "application/json" },
+            onload: function (response) {
+                try {
+                    const data = JSON.parse(response.responseText);
+                    const element = document.querySelector(selector);
+                    const count = data.total_count ?? 0;
+
+                    element.innerHTML = `<span class="pys-count-number">${count}</span>`;
+
+                    // Animate the number
+                    animateNumber(element.querySelector(".pys-count-number"), count);
+                } catch (err) {
+                    console.error("Veri çekme hatası:", err);
+                    document.querySelector(selector).innerHTML =
+                        '<span class="pys-error">Hata</span>';
+                }
+            },
+            onerror: function () {
+                document.querySelector(selector).innerHTML =
+                    '<span class="pys-error">API Hatası</span>';
+            },
+        });
     }
-
-      for (const key in params) {
-          const values = Array.isArray(params[key]) ? params[key] : [params[key]];
-          for (const val of values) {
-              url.searchParams.append(key, val);
-          }
-      }
-
-      GM_xmlhttpRequest({
-          method: "GET",
-          url: url.toString(),
-          headers: { "Content-Type": "application/json" },
-          onload: function (response) {
-              try {
-                  const data = JSON.parse(response.responseText);
-                  const element = document.querySelector(selector);
-                  const count = data.total_count ?? 0;
-
-                  element.innerHTML = `<span class="pys-count-number">${count}</span>`;
-
-                  // Animate the number
-                  animateNumber(element.querySelector(".pys-count-number"), count);
-              } catch (err) {
-                  console.error("Veri çekme hatası:", err);
-                  document.querySelector(selector).innerHTML =
-                      '<span class="pys-error">Hata</span>';
-              }
-          },
-          onerror: function () {
-              document.querySelector(selector).innerHTML =
-                  '<span class="pys-error">API Hatası</span>';
-          },
-      });
-  }
 
     function fetchTimeSpentThisMonth(params, selector, userId) {
         const limit = 100;
@@ -950,49 +951,55 @@
                     tbody.innerHTML = "";
 
                     if (!data.time_entries || data.time_entries.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="5">Kayıt bulunamadı</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="6">Kayıt bulunamadı</td></tr>`;
                         return;
                     }
 
                     data.time_entries.forEach((entry) => {
                         const activity = entry.activity?.name || "-";
+                        const d = new Date(entry.spent_on);
+                        const formattedDate = d.toLocaleDateString('tr-TR', {
+                            day: '2-digit',
+                            month: '2-digit'
+                        });
                         const issueId = entry.issue?.id || "";
                         const issueLink = issueId
                         ? `<a href="${BASE_URL}/issues/${issueId}" target="_blank">#${issueId}</a>`
               : "-";
 
-              // Custom field 4: Notlar
-              let notes = "-";
-              const cf4 = entry.custom_fields?.find((cf) => cf.id === 4);
-              if (cf4 && cf4.value) {
-                  notes = Array.isArray(cf4.value)
-                      ? cf4.value.join(", ")
-                  : cf4.value;
-              }
+                        // Custom field 4: Notlar
+                        let notes = "-";
+                        const cf4 = entry.custom_fields?.find((cf) => cf.id === 4);
+                        if (cf4 && cf4.value) {
+                            notes = Array.isArray(cf4.value)
+                                ? cf4.value.join(", ")
+                            : cf4.value;
+                        }
 
-              const hours = entry.hours != null ? entry.hours.toFixed(1) : "0.0";
-              const editLink = `<a title="Edit" href="/time_entries/${entry.id}/edit" data-iconified="true"> <i class="fa-solid fa-pen-to-square" title="Edit" style="margin-left: 8px;"></i></a>`;
+                        const hours = entry.hours != null ? entry.hours.toFixed(1) : "0.0";
+                        const editLink = `<a title="Edit" href="/time_entries/${entry.id}/edit" data-iconified="true"> <i class="fa-solid fa-pen-to-square" title="Edit" style="margin-left: 8px;"></i></a>`;
 
-              tbody.insertAdjacentHTML(
-                  "beforeend",
-                  `<tr>
+                        tbody.insertAdjacentHTML(
+                            "beforeend",
+                            `<tr>
                             <td>${activity}</td>
+                            <td>${formattedDate}</td>
                             <td>${issueLink}</td>
                             <td>${notes}</td>
                             <td style="text-align:right;">${hours}</td>
                             <td> ${editLink}</td>
                         </tr>`
             );
-          });
-        } catch (err) {
-            console.error("Zaman tablosu hatası:", err);
-        }
-      },
-        onerror: function () {
-            console.error("Zaman tablosu yüklenemedi");
-        },
-    });
-  }
+                    });
+                } catch (err) {
+                    console.error("Zaman tablosu hatası:", err);
+                }
+            },
+            onerror: function () {
+                console.error("Zaman tablosu yüklenemedi");
+            },
+        });
+    }
     // --- NEW CODE END ---
 
     let pieChartInstance = null;
@@ -1019,104 +1026,104 @@
             (_, i) => `hsl(${((i * 360) / labels.length) % 360}, 70%, 60%)`
     );
 
-      const ctx = document.getElementById("activity-pie-chart").getContext("2d");
+        const ctx = document.getElementById("activity-pie-chart").getContext("2d");
 
-      pieChartInstance = new Chart(ctx, {
-          type: "pie",
-          data: {
-              labels,
-              datasets: [
-                  {
-                      data,
-                      backgroundColor: colors,
-                      hoverOffset: 20,
-                  },
-              ],
-          },
-          options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                  datalabels: {
-                      color: "#fff",
-                      font: {
-                          weight: "bold",
-                          size: 12,
-                      },
-                      formatter: function (value, context) {
-                          const data = context.chart.data.datasets[0].data;
-                          const sorted = [...data].sort((a, b) => b - a);
-                          const top3 = sorted.slice(0, 3);
-                          return top3.includes(value) ? value.toFixed(1) : null;
-                      },
-                  },
-                  tooltip: {
-                      callbacks: {
-                          label: function (context) {
-                              return `${context.label}: ${context.parsed.toFixed(1)} saat`;
-                          },
-                      },
-                  },
-                  legend: {
-                      position: "left",
-                      labels: {
-                          usePointStyle: true,
-                          pointStyle: "circle",
-                          boxWidth: 10,
-                      },
-                  },
-              },
-              animation: {
-                  animateRotate: true,
-                  duration: 1000,
-              },
-          },
-          plugins: [ChartDataLabels,
+        pieChartInstance = new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels,
+                datasets: [
                     {
-                        id: "totalValueBottomRight",
-                        afterDraw(chart) {
-                            const { ctx, chartArea } = chart;
-                            const dataset = chart.data.datasets[0].data;
-                            const total = dataset.reduce((a, b) => a + b, 0);
-                            const text = total.toFixed(1) + " saat";
-
-                            ctx.save();
-                            ctx.font = "bold 14px sans-serif";
-                            ctx.textAlign = "right";
-                            ctx.textBaseline = "bottom";
-
-                            // Metin boyutlarını hesapla
-                            const textMetrics = ctx.measureText(text);
-                            const paddingX = 5;
-                            const paddingY = 5;
-                            const boxWidth = textMetrics.width + paddingX * 2;
-                            const boxHeight = 24;
-
-                            // Kutu koordinatları
-                            const x = chartArea.right;
-                            const y = chartArea.bottom;
-
-                            // arka plan kutusu tema uyumlu
-                            ctx.fillStyle = getComputedStyle(document.documentElement)
-                                .getPropertyValue("--bg-tertiary")
-                                .trim() || "#444";
-                            ctx.beginPath();
-                            ctx.roundRect(x - boxWidth, y - boxHeight, boxWidth, boxHeight, 8);
-                            ctx.fill();
-
-                            // Yazı rengi (tema uyumlu)
-                            ctx.fillStyle = getComputedStyle(document.documentElement)
-                                .getPropertyValue("--text-primary")
-                                .trim() || "#fff";
-                            ctx.fillText(text, x - paddingX, y - 6);
-
-
-                            ctx.restore();
+                        data,
+                        backgroundColor: colors,
+                        hoverOffset: 20,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        color: "#fff",
+                        font: {
+                            weight: "bold",
+                            size: 12,
+                        },
+                        formatter: function (value, context) {
+                            const data = context.chart.data.datasets[0].data;
+                            const sorted = [...data].sort((a, b) => b - a);
+                            const top3 = sorted.slice(0, 3);
+                            return top3.includes(value) ? value.toFixed(1) : null;
                         },
                     },
-                   ],
-      });
-  }
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ${context.parsed.toFixed(1)} saat`;
+                            },
+                        },
+                    },
+                    legend: {
+                        position: "left",
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                            boxWidth: 10,
+                        },
+                    },
+                },
+                animation: {
+                    animateRotate: true,
+                    duration: 1000,
+                },
+            },
+            plugins: [ChartDataLabels,
+                      {
+                          id: "totalValueBottomRight",
+                          afterDraw(chart) {
+                              const { ctx, chartArea } = chart;
+                              const dataset = chart.data.datasets[0].data;
+                              const total = dataset.reduce((a, b) => a + b, 0);
+                              const text = total.toFixed(1) + " saat";
+
+                              ctx.save();
+                              ctx.font = "bold 14px sans-serif";
+                              ctx.textAlign = "right";
+                              ctx.textBaseline = "bottom";
+
+                              // Metin boyutlarını hesapla
+                              const textMetrics = ctx.measureText(text);
+                              const paddingX = 5;
+                              const paddingY = 5;
+                              const boxWidth = textMetrics.width + paddingX * 2;
+                              const boxHeight = 24;
+
+                              // Kutu koordinatları
+                              const x = chartArea.right;
+                              const y = chartArea.bottom;
+
+                              // arka plan kutusu tema uyumlu
+                              ctx.fillStyle = getComputedStyle(document.documentElement)
+                                  .getPropertyValue("--bg-tertiary")
+                                  .trim() || "#444";
+                              ctx.beginPath();
+                              ctx.roundRect(x - boxWidth, y - boxHeight, boxWidth, boxHeight, 8);
+                              ctx.fill();
+
+                              // Yazı rengi (tema uyumlu)
+                              ctx.fillStyle = getComputedStyle(document.documentElement)
+                                  .getPropertyValue("--text-primary")
+                                  .trim() || "#fff";
+                              ctx.fillText(text, x - paddingX, y - 6);
+
+
+                              ctx.restore();
+                          },
+                      },
+                     ],
+        });
+    }
 
     function animateNumber(element, targetValue, decimals = 0) {
         const startValue = 0;
