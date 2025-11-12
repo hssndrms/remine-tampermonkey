@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         PYS 😎 Iconları Font Awesome ile Değiştir
 // @namespace    https://fontawesome.com/icons
-// @version      2025-10-08
+// @version      2025-11-11
 // @description  Redmine'deki icon-* sınıflarını Font Awesome ikonlarla değiştirir. Dinamik içerik desteği (MutationObserver) ile tam uyum sağlar.
 // @author       hssndrms
 // @match        https://pys.koton.com.tr/*
+// @match        https://www.redmine.org/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/font-awesome-icon-degistir.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/font-awesome-icon-degistir.user.js
@@ -70,7 +71,9 @@
         'icon-issue-closed': 'fa-regular fa-square-check',
         'icon-issue-open': 'fa-regular fa-square',
         'icon-issue-edit': 'fa-regular fa-pen-to-square',
-        'icon-time': 'fa-regular fa-clock'
+        'icon-time': 'fa-regular fa-clock',
+        'icon-news': 'fa-regular fa-newspaper',
+        'icon-package': 'fa-solid fa-cube'
     };
 
     function processIcons(root = document) {
