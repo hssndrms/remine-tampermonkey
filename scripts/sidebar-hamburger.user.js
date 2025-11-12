@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         PYS Sidebar Göster/Gizle
 // @namespace    https://pys.koton.com.tr
-// @version      2025-09-04
+// @version      2025-11-11
 // @description  Sidebar'ı Hamburger İkonu ile Gizle/Göster, durumu hatırla (Font Awesome ile)
 // @author       hssndrms
-// @match        https://pys.koton.com.tr/*
+// @match        https://pys.koton.com.tr/kapalı*
+// @match        https://www.redmine.org/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=https://www.redmine.org/
 // @downloadURL  https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/sidebar-hamburger.user.js
 // @updateURL    https://raw.githubusercontent.com/hssndrms/remine-tampermonkey/master/scripts/sidebar-hamburger.user.js
